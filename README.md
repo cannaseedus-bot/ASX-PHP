@@ -1,6 +1,6 @@
 # ASX-PHP
 
-# PHPServer.ps1 - Complete PHP Runtime Server
+# PS1 PHP Server - Complete PHP Runtime Server
 
 A lightweight, self-contained PHP runtime server built in PowerShell with support for REST API, JSON-RPC, DNS caching, file caching, and MCP (Model Context Protocol). No external dependencies required.
 
@@ -102,7 +102,7 @@ curl -X POST http://localhost:8080/mcp \
 
 ```powershell
 # Download the script
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/your-repo/PHPServer.ps1" -OutFile "PHPServer.ps1"
+Invoke-WebRequest -Uri "https://github.com/cannaseedus-bot/ASX-PHP.git" -OutFile "PHPServer.ps1"
 
 # Make it executable (Linux/macOS)
 chmod +x PHPServer.ps1
@@ -111,7 +111,7 @@ chmod +x PHPServer.ps1
 #### Option 2: Clone Repository
 
 ```bash
-git clone https://github.com/your-repo/php-server
+git clone https://github.com/cannaseedus-bot/ASX-PHP.git
 cd php-server
 ```
 
