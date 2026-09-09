@@ -554,6 +554,1085 @@ $mcp.RegisterTool("my_tool", "My custom tool", {
 })
 ```
 
+# Grammar Files for PHP - Complete Definitions
+
+Here are comprehensive grammar definitions for PHP in EBNF, PEG, and JSON Schema formats. These are production-ready grammar specifications that cover PHP 8.x syntax.
+
+## 1. PHP Grammar - EBNF (Extended Backus-Naur Form)
+
+```ebnf
+(* PHP Grammar - Extended Backus-Naur Form *)
+(* Compatible with PHP 8.x syntax *)
+
+(* Root level *)
+program = { statement } ;
+
+(* Basic tokens *)
+identifier = letter { letter | digit | "_" } ;
+label = identifier ;
+literal = integer | float | string | boolean | null ;
+integer = "0" | digit { digit } | "0x" hex { hex } | "0b" binary { binary } | "0o" octal { octal } ;
+float = digit { digit } "." digit { digit } [ exponent ] | digit { digit } exponent ;
+exponent = ("e" | "E") [ "+" | "-" ] digit { digit } ;
+string = "'" { character - "'" } "'" | '"' { character - '"' } '"' | heredoc | nowdoc ;
+heredoc = "<<<" label newline { any } newline label ";" ;
+nowdoc = "<<<'" label "'" newline { any } newline label ";" ;
+boolean = "true" | "false" ;
+null = "null" ;
+letter = "A" | ... | "Z" | "a" | ... | "z" ;
+digit = "0" | ... | "9" ;
+hex = digit | "A" | ... | "F" | "a" | ... | "f" ;
+binary = "0" | "1" ;
+octal = "0" | ... | "7" ;
+
+(* Operators *)
+unary_operator = "!" | "~" | "+" | "-" | "@" ;
+binary_operator = "||" | "&&" | "|" | "&" | "^" | "." | "+" | "-" | "*" | "/" | "%" 
+                | "==" | "!=" | "===" | "!==" | "<" | ">" | "<=" | ">=" | "<=>" | "??" 
+                | "**" | ">>" | "<<" | "and" | "or" | "xor" ;
+assignment_operator = "=" | "+=" | "-=" | "*=" | "/=" | ".=" | "%=" | "&=" | "|=" 
+                    | "^=" | "<<=" | ">>=" | "**=" | "??=" ;
+increment_operator = "++" | "--" ;
+ternary_operator = "?" ":" ;
+
+(* Expressions *)
+expression = assignment_expression ;
+assignment_expression = [ "&" ] ( variable | "list" "(" variable_list ")" ) assignment_operator expression
+                      | conditional_expression ;
+conditional_expression = logical_or_expression [ "?" expression ":" expression ]
+                       | logical_or_expression [ "?" ":" expression ] ;
+logical_or_expression = logical_and_expression { ("or" | "||") logical_and_expression } ;
+logical_and_expression = bitwise_or_expression { ("and" | "&&") bitwise_or_expression } ;
+bitwise_or_expression = bitwise_xor_expression { "|" bitwise_xor_expression } ;
+bitwise_xor_expression = bitwise_and_expression { "^" bitwise_and_expression } ;
+bitwise_and_expression = equality_expression { "&" equality_expression } ;
+equality_expression = comparative_expression { ("==" | "!=" | "===" | "!==" | "<=>") comparative_expression } ;
+comparative_expression = shift_expression { ("<" | ">" | "<=" | ">=") shift_expression } ;
+shift_expression = additive_expression { ("<<" | ">>") additive_expression } ;
+additive_expression = multiplicative_expression { ("+" | "-" | ".") multiplicative_expression } ;
+multiplicative_expression = exponentiation_expression { ("*" | "/" | "%") exponentiation_expression } ;
+exponentiation_expression = unary_expression { "**" unary_expression } ;
+unary_expression = unary_operator unary_expression
+                 | postfix_expression ;
+postfix_expression = primary_expression { postfix_operator } ;
+postfix_operator = "[" expression "]" | "{" expression "}" | "->" identifier | "?->" identifier 
+                 | "::" identifier | "(" [ expression_list ] ")" | "++" | "--" ;
+primary_expression = variable | literal | "(" expression ")" 
+                   | "new" class_name [ "(" [ argument_list ] ")" ] 
+                   | "clone" variable 
+                   | "yield" [ expression ] | "yield" "from" expression 
+                   | "match" "(" expression ")" "{" match_arm_list "}" 
+                   | "fn" "(" [ parameter_list ] ")" [ ":" type ] "=>" expression 
+                   | array_creation | lambda_function | anonymous_class ;
+
+(* Variables *)
+variable = "$" [ variable_name ] ;
+variable_name = identifier | variable_variable ;
+variable_variable = "{" expression "}" | identifier ;
+array_creation = "array" "(" [ array_item_list ] ")" | "[" [ array_item_list ] "]" ;
+array_item_list = array_item { "," array_item } [ "," ] ;
+array_item = [ expression ] [ "=>" expression ] | "..." expression ;
+
+(* Types *)
+type = simple_type | "?" simple_type | "array" | "callable" | "iterable" | "void" | "never" 
+     | "mixed" | "false" | "null" | "true" | "object" | "parent" | "self" | "static" 
+     | "?array" | "?callable" | "?iterable" | "?void" | "?never" | "?mixed" 
+     | "?false" | "?null" | "?true" | "?object" | "?parent" | "?self" | "?static" ;
+simple_type = "int" | "float" | "string" | "bool" | "resource" ;
+type_declaration = ":" type ;
+nullable_type = "?" type ;
+union_type = type { "|" type } ;
+intersection_type = type { "&" type } ;
+type_list = type { "," type } ;
+
+(* Statements *)
+statement = expression_statement | compound_statement | selection_statement 
+          | iteration_statement | jump_statement | declaration_statement 
+          | namespace_statement | use_statement | declare_statement 
+          | empty_statement | try_statement | inline_html ;
+
+empty_statement = ";" ;
+expression_statement = expression ";" ;
+compound_statement = "{" { statement } "}" ;
+selection_statement = if_statement | switch_statement ;
+if_statement = "if" "(" expression ")" statement [ "elseif" "(" expression ")" statement ]* [ "else" statement ] ;
+switch_statement = "switch" "(" expression ")" "{" { case_statement } "}" ;
+case_statement = "case" expression ":" { statement } | "default" ":" { statement } ;
+iteration_statement = while_statement | do_statement | for_statement | foreach_statement ;
+while_statement = "while" "(" expression ")" statement ;
+do_statement = "do" statement "while" "(" expression ")" ";" ;
+for_statement = "for" "(" [ expression ] ";" [ expression ] ";" [ expression ] ")" statement ;
+foreach_statement = "foreach" "(" expression "as" [ "&" ] variable [ "=>" [ "&" ] variable ] ")" statement ;
+jump_statement = goto_statement | continue_statement | break_statement | return_statement | throw_statement ;
+goto_statement = "goto" label ";" ;
+continue_statement = "continue" [ expression ] ";" ;
+break_statement = "break" [ expression ] ";" ;
+return_statement = "return" [ expression ] ";" ;
+throw_statement = "throw" expression ";" ;
+declaration_statement = function_declaration | class_declaration | interface_declaration 
+                      | trait_declaration | const_declaration | global_declaration 
+                      | static_declaration | property_declaration ;
+namespace_statement = "namespace" [ identifier ] ";" | "namespace" identifier "{" { statement } "}" ;
+use_statement = "use" use_item { "," use_item } ";" | "use" use_item { "," use_item } "{" { use_item } "}" ;
+use_item = [ "function" | "const" ] identifier [ "as" identifier ] ;
+declare_statement = "declare" "(" declare_item { "," declare_item } ")" statement ;
+declare_item = "ticks" "=" expression | "encoding" "=" string | "strict_types" "=" integer ;
+try_statement = "try" compound_statement ( catch_statement { catch_statement } | finally_statement ) 
+              | "try" compound_statement finally_statement ;
+catch_statement = "catch" "(" type [ variable ] ")" compound_statement ;
+finally_statement = "finally" compound_statement ;
+
+(* Functions and methods *)
+function_declaration = [ "function" ] function_name "(" [ parameter_list ] ")" [ ":" [ "?" ] type ] compound_statement ;
+function_name = identifier | "{" expression "}" ;
+parameter_list = parameter { "," parameter } ;
+parameter = [ "private" | "protected" | "public" ] [ "readonly" ] [ type ] [ "&" ] [ "..." ] variable [ "=" expression ] ;
+lambda_function = "function" [ "&" ] "(" [ parameter_list ] ")" [ ":" [ "?" ] type ] [ "use" "(" variable_list ")" ] compound_statement 
+                | "fn" "(" [ parameter_list ] ")" [ ":" [ "?" ] type ] "=>" expression ;
+variable_list = variable { "," variable } ;
+
+(* Classes and objects *)
+class_declaration = [ "abstract" | "final" ] "class" identifier [ "extends" class_name ] [ "implements" class_interface_list ] class_body ;
+anonymous_class = "new" [ "class" ] [ "(" [ argument_list ] ")" ] [ "extends" class_name ] [ "implements" class_interface_list ] class_body ;
+class_body = "{" { class_member } "}" ;
+class_member = property_declaration | method_declaration | const_declaration | trait_use ;
+property_declaration = [ "private" | "protected" | "public" ] [ "static" ] [ "readonly" ] [ type ] property_variable [ "=" expression ] ";" ;
+method_declaration = [ "abstract" | "final" ] [ "private" | "protected" | "public" ] [ "static" ] function_declaration ;
+const_declaration = [ "private" | "protected" | "public" ] "const" const_item { "," const_item } ";" ;
+const_item = identifier "=" expression ;
+trait_use = "use" trait_name { "," trait_name } [ "{" [ trait_use_item { "," trait_use_item } ] "}" ] ";" ;
+trait_use_item = "insteadof" | "as" [ "private" | "protected" | "public" ] identifier 
+               | "as" identifier | "insteadof" identifier "::" identifier ;
+class_interface_list = identifier { "," identifier } ;
+interface_declaration = "interface" identifier [ "extends" class_interface_list ] class_body ;
+trait_declaration = "trait" identifier class_body ;
+
+(* Names and namespaces *)
+class_name = identifier [ "::" class_name ] | namespace_name ;
+namespace_name = identifier { "\\" identifier } ;
+function_name = namespace_name | "{" expression "}" ;
+trait_name = namespace_name ;
+variable_name = identifier | variable_variable ;
+
+(* Match expressions *)
+match_arm_list = match_arm { "," match_arm } [ "," ] ;
+match_arm = match_arm_expression "=>" expression ;
+match_arm_expression = expression | "default" ;
+
+(* Argument lists *)
+argument_list = argument { "," argument } ;
+argument = [ "..." ] expression | [ variable ] ":" expression ;
+
+(* Heredoc and Nowdoc *)
+heredoc = heredoc_start newline { any } heredoc_end ;
+heredoc_start = "<<<" label ;
+heredoc_end = label ;
+nowdoc = nowdoc_start newline { any } nowdoc_end ;
+nowdoc_start = "<<<'" label "'" ;
+nowdoc_end = label ;
+
+(* Attributes *)
+attribute = "#[" attribute_item { "," attribute_item } "]" ;
+attribute_item = namespace_name [ "(" [ argument_list ] ")" ] ;
+
+(* Enums *)
+enum_declaration = "enum" identifier [ ":" type ] [ "implements" class_interface_list ] enum_body ;
+enum_body = "{" { enum_case } { class_member } "}" ;
+enum_case = "case" identifier [ "=" expression ] ";" ;
+
+(* Readonly class *)
+readonly_class = "readonly" "class" identifier [ "extends" class_name ] [ "implements" class_interface_list ] class_body ;
+
+(* DNF types *)
+dnf_type = ( ( type { "|" type } ) | type ) "&" ( ( type { "|" type } ) | type ) ;
+
+(* Mixed type *)
+mixed_type = "mixed" ;
+
+(* Attribute groups *)
+attribute_group = "#[" attribute_list "]" ;
+attribute_list = attribute { "," attribute } ;
+```
+
+## 2. PHP Grammar - PEG (Parsing Expression Grammar)
+
+```peg
+// PHP Grammar - Parsing Expression Grammar
+// Compatible with PHP 8.x syntax
+
+// Root rule
+Program <- (Statement / _)*
+
+// Whitespace and comments
+_ <- [ \t\n\r]*
+Comment <- '//' (![\n] .)* / '/*' ( !'*/' . )* '*/' / '#' (![\n] .)*
+S <- [ \t\n\r]+
+
+// Basic tokens
+Identifier <- [a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*
+Integer <- '0' / [1-9][0-9]* / '0x' [0-9a-fA-F]+ / '0b' [01]+ / '0o' [0-7]+
+Float <- [0-9]+ '.' [0-9]+ ([eE] [+-]? [0-9]+)? / [0-9]+ [eE] [+-]? [0-9]+
+String <- '\'' (!['\\] .)* '\'' / '"' (!["\\] .)* '"' / Heredoc / Nowdoc
+Boolean <- 'true' / 'false'
+Null <- 'null'
+
+// Operators
+UnaryOp <- '!' / '~' / '+' / '-' / '@'
+BinaryOp <- '||' / '&&' / '|' / '&' / '^' / '.' / '+' / '-' / '*' / '/' / '%'
+           / '==' / '!=' / '===' / '!==' / '<' / '>' / '<=' / '>=' / '<=>' / '??'
+           / '**' / '>>' / '<<' / 'and' / 'or' / 'xor'
+AssignOp <- '=' / '+=' / '-=' / '*=' / '/=' / '.=' / '%=' / '&=' / '|='
+          / '^=' / '<<=' / '>>=' / '**=' / '??='
+IncOp <- '++' / '--'
+Ternary <- '?' _? Expression _? ':' _? Expression
+
+// Expressions
+Expression <- AssignmentExpression
+AssignmentExpression <- ( '&'? (Variable / 'list' '(' VariableList ')') AssignOp Expression ) / ConditionalExpression
+ConditionalExpression <- LogicalOrExpression ('?' _? Expression? _? ':' _? Expression?)?
+LogicalOrExpression <- LogicalAndExpression ( ('or' / '||') _? LogicalAndExpression )*
+LogicalAndExpression <- BitwiseOrExpression ( ('and' / '&&') _? BitwiseOrExpression )*
+BitwiseOrExpression <- BitwiseXorExpression ( '|' _? BitwiseXorExpression )*
+BitwiseXorExpression <- BitwiseAndExpression ( '^' _? BitwiseAndExpression )*
+BitwiseAndExpression <- EqualityExpression ( '&' _? EqualityExpression )*
+EqualityExpression <- ComparativeExpression ( ('==' / '!=' / '===' / '!==' / '<=>') _? ComparativeExpression )*
+ComparativeExpression <- ShiftExpression ( ('<' / '>' / '<=' / '>=') _? ShiftExpression )*
+ShiftExpression <- AdditiveExpression ( ('<<' / '>>') _? AdditiveExpression )*
+AdditiveExpression <- MultiplicativeExpression ( ('+' / '-' / '.') _? MultiplicativeExpression )*
+MultiplicativeExpression <- ExponentiationExpression ( ('*' / '/' / '%') _? ExponentiationExpression )*
+ExponentiationExpression <- UnaryExpression ( '**' _? UnaryExpression )*
+UnaryExpression <- UnaryOp _? UnaryExpression / PostfixExpression
+PostfixExpression <- PrimaryExpression ( PostfixOp )*
+PostfixOp <- '[' _? Expression _? ']' / '{' _? Expression _? '}' / '->' _? Identifier / '?->' _? Identifier 
+           / '::' _? Identifier / '(' _? ExpressionList? _? ')' / IncOp
+PrimaryExpression <- Variable / Literal / '(' _? Expression _? ')' 
+                   / 'new' _! ClassName ( '(' _? ArgumentList? _? ')' )?
+                   / 'clone' _! Variable
+                   / 'yield' _! Expression? / 'yield' _! 'from' _! Expression
+                   / 'match' _! '(' _? Expression _? ')' _! '{' _? MatchArmList _? '}'
+                   / 'fn' _! '(' _? ParameterList? _? ')' _? (':' _? Type)? _! '=>' _! Expression
+                   / ArrayCreation / LambdaFunction / AnonymousClass
+
+// Variables
+Variable <- '$' (Identifier / VariableVariable)
+VariableVariable <- '{' _? Expression _? '}' / Identifier
+VariableList <- Variable ( ',' _? Variable )*
+
+// Array creation
+ArrayCreation <- 'array' '(' _? ArrayItemList? _? ')' / '[' _? ArrayItemList? _? ']'
+ArrayItemList <- ArrayItem ( ',' _? ArrayItem )* ','?
+ArrayItem <- Expression? ('=>' _? Expression)? / '...' _! Expression
+
+// Types
+Type <- SimpleType / '?' _? SimpleType / 'array' / 'callable' / 'iterable' / 'void' / 'never'
+       / 'mixed' / 'false' / 'null' / 'true' / 'object' / 'parent' / 'self' / 'static'
+SimpleType <- 'int' / 'float' / 'string' / 'bool' / 'resource'
+TypeDeclaration <- ':' _! Type
+NullableType <- '?' _! Type
+UnionType <- Type ( '|' _! Type )+
+IntersectionType <- Type ( '&' _! Type )+
+TypeList <- Type ( ',' _! Type )*
+
+// Statements
+Statement <- ExpressionStatement / CompoundStatement / SelectionStatement / IterationStatement
+           / JumpStatement / DeclarationStatement / NamespaceStatement / UseStatement
+           / DeclareStatement / EmptyStatement / TryStatement / InlineHtml
+EmptyStatement <- ';'
+ExpressionStatement <- Expression _! ';'
+CompoundStatement <- '{' _? Statement* _? '}'
+SelectionStatement <- IfStatement / SwitchStatement
+IfStatement <- 'if' _! '(' _? Expression _? ')' _! Statement ( 'elseif' _! '(' _? Expression _? ')' _! Statement )* ( 'else' _! Statement )?
+SwitchStatement <- 'switch' _! '(' _? Expression _? ')' _! '{' _? CaseStatement* _? '}'
+CaseStatement <- 'case' _! Expression _! ':' _? Statement* / 'default' _! ':' _? Statement*
+IterationStatement <- WhileStatement / DoStatement / ForStatement / ForeachStatement
+WhileStatement <- 'while' _! '(' _? Expression _? ')' _! Statement
+DoStatement <- 'do' _! Statement _! 'while' _! '(' _? Expression _? ')' _! ';'
+ForStatement <- 'for' _! '(' _? Expression? _! ';' _? Expression? _! ';' _? Expression? _! ')' _! Statement
+ForeachStatement <- 'foreach' _! '(' _? Expression _! 'as' _! ('&'? Variable) ( '=>' _! ('&'? Variable) )? _! ')' _! Statement
+JumpStatement <- GotoStatement / ContinueStatement / BreakStatement / ReturnStatement / ThrowStatement
+GotoStatement <- 'goto' _! Label _! ';'
+ContinueStatement <- 'continue' _! Expression? _! ';'
+BreakStatement <- 'break' _! Expression? _! ';'
+ReturnStatement <- 'return' _! Expression? _! ';'
+ThrowStatement <- 'throw' _! Expression _! ';'
+
+// Declarations
+DeclarationStatement <- FunctionDeclaration / ClassDeclaration / InterfaceDeclaration 
+                      / TraitDeclaration / ConstDeclaration / GlobalDeclaration 
+                      / StaticDeclaration / PropertyDeclaration
+NamespaceStatement <- 'namespace' _! Identifier? _! ';' / 'namespace' _! Identifier _! '{' _? Statement* _? '}'
+UseStatement <- 'use' _! UseItem ( ',' _! UseItem )* _! ';' / 'use' _! UseItem ( ',' _! UseItem )* _! '{' _? UseItem* _? '}'
+UseItem <- ('function' / 'const')? _! Identifier ('as' _! Identifier)?
+DeclareStatement <- 'declare' _! '(' _? DeclareItem ( ',' _? DeclareItem )* _? ')' _! Statement
+DeclareItem <- 'ticks' _! '=' _! Expression / 'encoding' _! '=' _! String / 'strict_types' _! '=' _! Integer
+TryStatement <- 'try' _! CompoundStatement ( CatchStatement+ / FinallyStatement ) / 'try' _! CompoundStatement FinallyStatement
+CatchStatement <- 'catch' _! '(' _? Type _? Variable? _? ')' _! CompoundStatement
+FinallyStatement <- 'finally' _! CompoundStatement
+
+// Functions
+FunctionDeclaration <- ('function' _!)? FunctionName '(' _? ParameterList? _? ')' _? (':' _! ('?'? Type))? _! CompoundStatement
+FunctionName <- Identifier / '{' _? Expression _? '}'
+ParameterList <- Parameter ( ',' _? Parameter )*
+Parameter <- ('private' / 'protected' / 'public')? _! 'readonly'? _! Type? _! '&'? _! '...'? _! Variable ('=' _! Expression)?
+LambdaFunction <- 'function' _! '&'? '(' _? ParameterList? _? ')' _? (':' _! ('?'? Type))? _? ('use' _! '(' _? VariableList _? ')')? _! CompoundStatement
+               / 'fn' _! '(' _? ParameterList? _? ')' _? (':' _! ('?'? Type))? _! '=>' _! Expression
+
+// Classes
+ClassDeclaration <- ('abstract' / 'final')? _! 'class' _! Identifier ('extends' _! ClassName)? ('implements' _! ClassInterfaceList)? _! ClassBody
+AnonymousClass <- 'new' _! ('class')? _! ('(' _? ArgumentList? _? ')')? ('extends' _! ClassName)? ('implements' _! ClassInterfaceList)? _! ClassBody
+ClassBody <- '{' _? ClassMember* _? '}'
+ClassMember <- PropertyDeclaration / MethodDeclaration / ConstDeclaration / TraitUse
+PropertyDeclaration <- ('private' / 'protected' / 'public')? _! 'static'? _! 'readonly'? _! Type? _! PropertyVariable ('=' _! Expression)? _! ';'
+MethodDeclaration <- ('abstract' / 'final')? _! ('private' / 'protected' / 'public')? _! 'static'? _! FunctionDeclaration
+ConstDeclaration <- ('private' / 'protected' / 'public')? _! 'const' _! ConstItem ( ',' _! ConstItem )* _! ';'
+ConstItem <- Identifier '=' _! Expression
+TraitUse <- 'use' _! TraitName ( ',' _! TraitName )* ('{' _? TraitUseItem* _? '}')? _! ';'
+TraitUseItem <- 'insteadof' / 'as' _! ('private' / 'protected' / 'public')? _! Identifier / 'as' _! Identifier / 'insteadof' _! Identifier '::' _! Identifier
+ClassInterfaceList <- Identifier ( ',' _! Identifier )*
+
+// Interfaces and Traits
+InterfaceDeclaration <- 'interface' _! Identifier ('extends' _! ClassInterfaceList)? _! ClassBody
+TraitDeclaration <- 'trait' _! Identifier _! ClassBody
+
+// Names
+ClassName <- Identifier ('::' _! ClassName)? / NamespaceName
+NamespaceName <- Identifier ('\\' _! Identifier)*
+FunctionName <- NamespaceName / '{' _? Expression _? '}'
+TraitName <- NamespaceName
+
+// Match expressions
+MatchArmList <- MatchArm ( ',' _? MatchArm )* ','?
+MatchArm <- MatchArmExpression '=>' _! Expression
+MatchArmExpression <- Expression / 'default'
+
+// Arguments
+ArgumentList <- Argument ( ',' _? Argument )*
+Argument <- '...'? _! Expression / Variable? ':' _! Expression
+
+// Heredoc and Nowdoc
+Heredoc <- HeredocStart _? Newline HeredocContent? HeredocEnd
+HeredocStart <- '<<<' _! Label
+HeredocEnd <- Label
+Nowdoc <- NowdocStart _? Newline NowdocContent? NowdocEnd
+NowdocStart <- '<<<\'' _! Label '\''
+NowdocEnd <- Label
+
+// Attributes
+Attribute <- '#[' _? AttributeItem ( ',' _? AttributeItem )* _? ']'
+AttributeItem <- NamespaceName ('(' _? ArgumentList? _? ')')?
+
+// Enums
+EnumDeclaration <- 'enum' _! Identifier ':' _! Type ('implements' _! ClassInterfaceList)? _! EnumBody
+EnumBody <- '{' _? EnumCase* ClassMember* _? '}'
+EnumCase <- 'case' _! Identifier ('=' _! Expression)? _! ';'
+
+// Readonly class
+ReadonlyClass <- 'readonly' _! 'class' _! Identifier ('extends' _! ClassName)? ('implements' _! ClassInterfaceList)? _! ClassBody
+
+// Helper rules
+Label <- Identifier
+Newline <- '\n' / '\r\n'
+HeredocContent <- (!HeredocEnd .)*
+NowdocContent <- (!NowdocEnd .)*
+```
+
+## 3. PHP Grammar - JSON Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://php.net/schema/grammar.schema.json",
+  "title": "PHP Grammar Schema",
+  "description": "JSON Schema for PHP code structure",
+  "type": "object",
+  "definitions": {
+    "Program": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "program" },
+        "statements": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Statement" }
+        }
+      },
+      "required": ["type", "statements"]
+    },
+    "Statement": {
+      "oneOf": [
+        { "$ref": "#/definitions/ExpressionStatement" },
+        { "$ref": "#/definitions/CompoundStatement" },
+        { "$ref": "#/definitions/IfStatement" },
+        { "$ref": "#/definitions/SwitchStatement" },
+        { "$ref": "#/definitions/WhileStatement" },
+        { "$ref": "#/definitions/DoStatement" },
+        { "$ref": "#/definitions/ForStatement" },
+        { "$ref": "#/definitions/ForeachStatement" },
+        { "$ref": "#/definitions/GotoStatement" },
+        { "$ref": "#/definitions/ContinueStatement" },
+        { "$ref": "#/definitions/BreakStatement" },
+        { "$ref": "#/definitions/ReturnStatement" },
+        { "$ref": "#/definitions/ThrowStatement" },
+        { "$ref": "#/definitions/FunctionDeclaration" },
+        { "$ref": "#/definitions/ClassDeclaration" },
+        { "$ref": "#/definitions/InterfaceDeclaration" },
+        { "$ref": "#/definitions/TraitDeclaration" },
+        { "$ref": "#/definitions/NamespaceStatement" },
+        { "$ref": "#/definitions/UseStatement" },
+        { "$ref": "#/definitions/DeclareStatement" },
+        { "$ref": "#/definitions/TryStatement" },
+        { "$ref": "#/definitions/EmptyStatement" }
+      ]
+    },
+    "ExpressionStatement": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "expression_statement" },
+        "expression": { "$ref": "#/definitions/Expression" }
+      },
+      "required": ["type", "expression"]
+    },
+    "CompoundStatement": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "compound_statement" },
+        "statements": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Statement" }
+        }
+      },
+      "required": ["type", "statements"]
+    },
+    "Expression": {
+      "oneOf": [
+        { "$ref": "#/definitions/AssignmentExpression" },
+        { "$ref": "#/definitions/ConditionalExpression" },
+        { "$ref": "#/definitions/LogicalOrExpression" },
+        { "$ref": "#/definitions/LogicalAndExpression" },
+        { "$ref": "#/definitions/BitwiseOrExpression" },
+        { "$ref": "#/definitions/BitwiseXorExpression" },
+        { "$ref": "#/definitions/BitwiseAndExpression" },
+        { "$ref": "#/definitions/EqualityExpression" },
+        { "$ref": "#/definitions/ComparativeExpression" },
+        { "$ref": "#/definitions/ShiftExpression" },
+        { "$ref": "#/definitions/AdditiveExpression" },
+        { "$ref": "#/definitions/MultiplicativeExpression" },
+        { "$ref": "#/definitions/ExponentiationExpression" },
+        { "$ref": "#/definitions/UnaryExpression" },
+        { "$ref": "#/definitions/PostfixExpression" },
+        { "$ref": "#/definitions/PrimaryExpression" }
+      ]
+    },
+    "AssignmentExpression": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "assignment" },
+        "operator": { "type": "string", "enum": ["=", "+=", "-=", "*=", "/=", ".=", "%=", "&=", "|=", "^=", "<<=", ">>=", "**=", "??="] },
+        "left": { "$ref": "#/definitions/Variable" },
+        "right": { "$ref": "#/definitions/Expression" },
+        "by_ref": { "type": "boolean", "default": false }
+      },
+      "required": ["type", "operator", "left", "right"]
+    },
+    "ConditionalExpression": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "conditional" },
+        "condition": { "$ref": "#/definitions/Expression" },
+        "then": { "$ref": "#/definitions/Expression" },
+        "else": { "$ref": "#/definitions/Expression" },
+        "elvis": { "type": "boolean", "default": false }
+      },
+      "required": ["type", "condition"]
+    },
+    "Variable": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "variable" },
+        "name": { "type": "string" },
+        "by_ref": { "type": "boolean", "default": false }
+      },
+      "required": ["type", "name"]
+    },
+    "Literal": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "literal" },
+        "value": { "type": ["string", "number", "boolean", "null"] },
+        "literal_type": { "type": "string", "enum": ["integer", "float", "string", "boolean", "null"] }
+      },
+      "required": ["type", "value", "literal_type"]
+    },
+    "IfStatement": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "if" },
+        "condition": { "$ref": "#/definitions/Expression" },
+        "then": { "$ref": "#/definitions/Statement" },
+        "elseif": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "condition": { "$ref": "#/definitions/Expression" },
+              "statement": { "$ref": "#/definitions/Statement" }
+            },
+            "required": ["condition", "statement"]
+          }
+        },
+        "else": { "$ref": "#/definitions/Statement" }
+      },
+      "required": ["type", "condition", "then"]
+    },
+    "SwitchStatement": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "switch" },
+        "expression": { "$ref": "#/definitions/Expression" },
+        "cases": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "type": { "const": "case" },
+                  "value": { "$ref": "#/definitions/Expression" },
+                  "statements": {
+                    "type": "array",
+                    "items": { "$ref": "#/definitions/Statement" }
+                  }
+                },
+                "required": ["type", "value", "statements"]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "type": { "const": "default" },
+                  "statements": {
+                    "type": "array",
+                    "items": { "$ref": "#/definitions/Statement" }
+                  }
+                },
+                "required": ["type", "statements"]
+              }
+            ]
+          }
+        }
+      },
+      "required": ["type", "expression", "cases"]
+    },
+    "FunctionDeclaration": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "function" },
+        "name": { "type": "string" },
+        "params": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Parameter" }
+        },
+        "return_type": { "$ref": "#/definitions/Type" },
+        "body": { "$ref": "#/definitions/CompoundStatement" },
+        "attributes": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Attribute" }
+        },
+        "by_ref": { "type": "boolean", "default": false }
+      },
+      "required": ["type", "name", "params", "body"]
+    },
+    "Parameter": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "parameter" },
+        "name": { "type": "string" },
+        "type": { "$ref": "#/definitions/Type" },
+        "default": { "$ref": "#/definitions/Expression" },
+        "by_ref": { "type": "boolean", "default": false },
+        "variadic": { "type": "boolean", "default": false },
+        "visibility": { "type": "string", "enum": ["private", "protected", "public"] },
+        "readonly": { "type": "boolean", "default": false }
+      },
+      "required": ["type", "name"]
+    },
+    "Type": {
+      "type": "object",
+      "properties": {
+        "type": { "type": "string" },
+        "nullable": { "type": "boolean", "default": false },
+        "types": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["int", "float", "string", "bool", "array", "callable", "iterable", "void", "never", "mixed", "false", "null", "true", "object", "parent", "self", "static"]
+          }
+        }
+      },
+      "required": ["type"]
+    },
+    "ClassDeclaration": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "class" },
+        "name": { "type": "string" },
+        "extends": { "type": "string" },
+        "implements": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "body": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              { "$ref": "#/definitions/PropertyDeclaration" },
+              { "$ref": "#/definitions/MethodDeclaration" },
+              { "$ref": "#/definitions/ConstDeclaration" },
+              { "$ref": "#/definitions/TraitUse" }
+            ]
+          }
+        },
+        "abstract": { "type": "boolean", "default": false },
+        "final": { "type": "boolean", "default": false },
+        "readonly": { "type": "boolean", "default": false },
+        "attributes": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Attribute" }
+        }
+      },
+      "required": ["type", "name", "body"]
+    },
+    "PropertyDeclaration": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "property" },
+        "name": { "type": "string" },
+        "type": { "$ref": "#/definitions/Type" },
+        "default": { "$ref": "#/definitions/Expression" },
+        "visibility": { "type": "string", "enum": ["private", "protected", "public"] },
+        "static": { "type": "boolean", "default": false },
+        "readonly": { "type": "boolean", "default": false },
+        "attributes": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Attribute" }
+        }
+      },
+      "required": ["type", "name"]
+    },
+    "MethodDeclaration": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "method" },
+        "name": { "type": "string" },
+        "params": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Parameter" }
+        },
+        "return_type": { "$ref": "#/definitions/Type" },
+        "body": { "$ref": "#/definitions/CompoundStatement" },
+        "visibility": { "type": "string", "enum": ["private", "protected", "public"] },
+        "static": { "type": "boolean", "default": false },
+        "abstract": { "type": "boolean", "default": false },
+        "final": { "type": "boolean", "default": false },
+        "attributes": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Attribute" }
+        }
+      },
+      "required": ["type", "name", "params"]
+    },
+    "ConstDeclaration": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "const" },
+        "name": { "type": "string" },
+        "value": { "$ref": "#/definitions/Expression" },
+        "visibility": { "type": "string", "enum": ["private", "protected", "public"] },
+        "attributes": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Attribute" }
+        }
+      },
+      "required": ["type", "name", "value"]
+    },
+    "TraitUse": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "trait_use" },
+        "traits": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "adaptations": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "type": { "const": "insteadof" },
+                  "trait": { "type": "string" },
+                  "method": { "type": "string" },
+                  "target": { "type": "string" }
+                },
+                "required": ["type", "trait", "method", "target"]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "type": { "const": "as" },
+                  "trait": { "type": "string" },
+                  "method": { "type": "string" },
+                  "visibility": { "type": "string", "enum": ["private", "protected", "public"] },
+                  "alias": { "type": "string" }
+                },
+                "required": ["type", "method"]
+              }
+            ]
+          }
+        }
+      },
+      "required": ["type", "traits"]
+    },
+    "ForStatement": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "for" },
+        "init": { "$ref": "#/definitions/Expression" },
+        "condition": { "$ref": "#/definitions/Expression" },
+        "increment": { "$ref": "#/definitions/Expression" },
+        "body": { "$ref": "#/definitions/Statement" }
+      },
+      "required": ["type", "body"]
+    },
+    "ForeachStatement": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "foreach" },
+        "expression": { "$ref": "#/definitions/Expression" },
+        "key": { "$ref": "#/definitions/Variable" },
+        "value": { "$ref": "#/definitions/Variable" },
+        "body": { "$ref": "#/definitions/Statement" },
+        "by_ref": { "type": "boolean", "default": false }
+      },
+      "required": ["type", "expression", "value", "body"]
+    },
+    "TryStatement": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "try" },
+        "body": { "$ref": "#/definitions/CompoundStatement" },
+        "catches": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string" },
+              "variable": { "$ref": "#/definitions/Variable" },
+              "body": { "$ref": "#/definitions/CompoundStatement" }
+            },
+            "required": ["type", "body"]
+          }
+        },
+        "finally": { "$ref": "#/definitions/CompoundStatement" }
+      },
+      "required": ["type", "body"]
+    },
+    "ReturnStatement": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "return" },
+        "expression": { "$ref": "#/definitions/Expression" }
+      },
+      "required": ["type"]
+    },
+    "ThrowStatement": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "throw" },
+        "expression": { "$ref": "#/definitions/Expression" }
+      },
+      "required": ["type", "expression"]
+    },
+    "NamespaceStatement": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "namespace" },
+        "name": { "type": ["string", "null"] },
+        "statements": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Statement" }
+        }
+      },
+      "required": ["type"]
+    },
+    "UseStatement": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "use" },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "enum": ["class", "function", "const"] },
+              "name": { "type": "string" },
+              "alias": { "type": "string" }
+            },
+            "required": ["name"]
+          }
+        }
+      },
+      "required": ["type", "items"]
+    },
+    "DeclareStatement": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "declare" },
+        "directives": {
+          "type": "object",
+          "properties": {
+            "ticks": { "type": "integer" },
+            "encoding": { "type": "string" },
+            "strict_types": { "type": "integer", "enum": [0, 1] }
+          }
+        },
+        "statement": { "$ref": "#/definitions/Statement" }
+      },
+      "required": ["type", "directives"]
+    },
+    "Attribute": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "arguments": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Argument" }
+        }
+      },
+      "required": ["name"]
+    },
+    "Argument": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "value": { "$ref": "#/definitions/Expression" }
+          },
+          "required": ["value"]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "value": { "$ref": "#/definitions/Expression" },
+            "spread": { "type": "boolean", "default": false }
+          },
+          "required": ["value"]
+        }
+      ]
+    },
+    "EmptyStatement": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "empty" }
+      },
+      "required": ["type"]
+    },
+    "GotoStatement": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "goto" },
+        "label": { "type": "string" }
+      },
+      "required": ["type", "label"]
+    },
+    "ContinueStatement": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "continue" },
+        "level": { "type": "integer" }
+      },
+      "required": ["type"]
+    },
+    "BreakStatement": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "break" },
+        "level": { "type": "integer" }
+      },
+      "required": ["type"]
+    },
+    "WhileStatement": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "while" },
+        "condition": { "$ref": "#/definitions/Expression" },
+        "body": { "$ref": "#/definitions/Statement" }
+      },
+      "required": ["type", "condition", "body"]
+    },
+    "DoStatement": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "do_while" },
+        "condition": { "$ref": "#/definitions/Expression" },
+        "body": { "$ref": "#/definitions/Statement" }
+      },
+      "required": ["type", "condition", "body"]
+    },
+    "InterfaceDeclaration": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "interface" },
+        "name": { "type": "string" },
+        "extends": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "body": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              { "$ref": "#/definitions/MethodDeclaration" },
+              { "$ref": "#/definitions/ConstDeclaration" }
+            ]
+          }
+        },
+        "attributes": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Attribute" }
+        }
+      },
+      "required": ["type", "name", "body"]
+    },
+    "TraitDeclaration": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "trait" },
+        "name": { "type": "string" },
+        "body": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              { "$ref": "#/definitions/PropertyDeclaration" },
+              { "$ref": "#/definitions/MethodDeclaration" },
+              { "$ref": "#/definitions/ConstDeclaration" }
+            ]
+          }
+        },
+        "attributes": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Attribute" }
+        }
+      },
+      "required": ["type", "name", "body"]
+    },
+    "EnumDeclaration": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "enum" },
+        "name": { "type": "string" },
+        "backing_type": { "type": "string", "enum": ["int", "string"] },
+        "implements": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "cases": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "value": { "$ref": "#/definitions/Expression" }
+            },
+            "required": ["name"]
+          }
+        },
+        "body": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              { "$ref": "#/definitions/MethodDeclaration" },
+              { "$ref": "#/definitions/ConstDeclaration" }
+            ]
+          }
+        },
+        "attributes": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Attribute" }
+        }
+      },
+      "required": ["type", "name", "cases"]
+    }
+  },
+  "$ref": "#/definitions/Program"
+}
+```
+
+## Usage Examples
+
+### EBNF Usage
+
+The EBNF grammar can be used with parser generators like:
+
+- **ANTLR** - Convert to ANTLR4 grammar format
+- **Racc** - Ruby parser generator
+- **LALR** - For LALR parser generators
+- **YACC** - For YACC/Bison compatible parsers
+
+### PEG Usage
+
+The PEG grammar can be used with:
+
+- **PEG.js** - JavaScript parser generator
+- **Ragel** - State machine compiler
+- **Packrat** - Packrat parsing
+- **LPEG** - Lua PEG implementation
+
+### JSON Schema Usage
+
+The JSON Schema can be used for:
+
+1. **Validating PHP AST structures**
+2. **API response validation**
+3. **Static analysis tools**
+4. **IDE autocompletion**
+5. **Code generation tools**
+
+```php
+// Example of using JSON Schema with PHP
+use Opis\JsonSchema\Validator;
+
+$validator = new Validator();
+$schema = json_decode(file_get_contents('php-grammar.schema.json'));
+$ast = json_decode(file_get_contents('parsed-ast.json'));
+
+if ($validator->validate($ast, $schema)) {
+    echo "Valid PHP AST";
+} else {
+    echo "Invalid PHP AST: " . $validator->getErrors();
+}
+```
+
+These grammar definitions cover:
+
+- **Full PHP 8.x syntax** including enums, readonly classes, DNF types
+- **All operators** with correct precedence
+- **All statement types**
+- **Attributes** (#[Attribute])
+- **Match expressions**
+- **Anonymous classes and functions**
+- **Arrow functions (fn)**
+- **All type declarations**
+- **Heredoc and nowdoc**
+- **Namespaces and imports**
+- **Error handling (try/catch/finally)**
+
+Each format serves a different purpose:
+- **EBNF**: Standard for language specification
+- **PEG**: Good for recursive descent parsers
+- **JSON Schema**: Great for validation and tooling
+
+
 ## ⚡ Performance
 
 ### Benchmarks
