@@ -1728,6 +1728,47 @@ Create cache/ and logs/ directories
 Run php -S localhost:8080 -t public or use Apache with the .htaccess file
 
 
+est Micronaut Endpoint
+bash
+# Get Micronaut info
+curl http://localhost:8080/micronaut
+
+# Create a fold
+curl -X POST http://localhost:8080/micronaut \
+  -H "Content-Type: application/json" \
+  -d '{"type":"fold","name":"my_fold","type_fold":"compute"}'
+
+# Execute a fold
+curl -X POST http://localhost:8080/micronaut \
+  -H "Content-Type: application/json" \
+  -d '{"type":"execute_fold","name":"my_fold","params":{"input":"test"}}'
+
+# Create an agent
+curl -X POST http://localhost:8080/micronaut \
+  -H "Content-Type: application/json" \
+  -d '{"type":"agent","name":"helper","type_agent":"helper","tools":["echo","dns_lookup"]}'
+4. Test MCP Endpoint
+bash
+# Initialize MCP
+curl -X POST http://localhost:8080/mcp \
+  -H "Content-Type: application/json" \
+  -d '{"type":"initialize"}'
+
+# List tools
+curl -X POST http://localhost:8080/mcp \
+  -H "Content-Type: application/json" \
+  -d '{"type":"tools/list"}'
+
+# Call K'UHUL tool
+curl -X POST http://localhost:8080/mcp \
+  -H "Content-Type: application/json" \
+  -d '{"type":"tools/call","name":"kuhul_perceive","parameters":{"input":{"message":"Hello"}}}'
+
+# Call Micronaut tool
+curl -X POST http://localhost:8080/mcp \
+  -H "Content-Type: application/json" \
+  -d '{"type":"tools/call","name":"micronaut_status"}'
+
 
 
 ## ⚡ Performance
