@@ -3147,7 +3147,139 @@ kuhul-es/
 | Gram | `G_` | Symbolic Index |
 | Rule | `X_` | XCFE Condition-Action |
 
-The complete grammar files are ready for use! 🚀
+
+
+🚀 Usage Examples
+1. Basic Vector Operations
+php
+require 'geometry.php';
+
+$v1 = new Vector(1, 2, 3);
+$v2 = new Vector(4, 5, 6);
+
+// Addition
+$sum = $v1->add($v2); // <5, 7, 9>
+
+// Dot product
+$dot = $v1->dot($v2); // 32
+
+// Cross product
+$cross = $v1->cross($v2); // <-3, 6, -3>
+
+// Length
+$len = $v1->length(); // ~3.74
+
+// Normalize
+$unit = $v1->normalize();
+2. Rotation with Quaternions
+php
+// Rotate 90 degrees around Y axis
+$q = Quaternion::fromAxisAngle(new Vector(0, 1, 0), M_PI / 2);
+
+$v = new Vector(1, 0, 0);
+$rotated = $q->rotate($v); // <0, 0, -1>
+
+// Convert to matrix
+$matrix = $q->toMatrix();
+3. Convex Hull
+php
+$points = [
+    new Vector(0, 0, 0),
+    new Vector(1, 0, 0),
+    new Vector(0, 1, 0),
+    new Vector(0, 0, 1),
+    new Vector(1, 1, 1),
+];
+
+$hull = new ConvexHull($points);
+echo "Faces: " . count($hull->getFaces()) . "\n";
+echo "Volume: " . $hull->volume() . "\n";
+4. Bezier Curve
+php
+$curve = new BezierCurve([
+    new Vector(0, 0, 0),
+    new Vector(1, 1, 0),
+    new Vector(2, 0, 0),
+    new Vector(3, 1, 0)
+]);
+
+$midpoint = $curve->evaluate(0.5);
+$tangent = $curve->derivative(0.5);
+$length = $curve->length();
+5. K'UHUL Phase Pipeline
+php
+$kuhul = new KuhulGeometry();
+
+// Pop - Perceive
+$input = $kuhul->perceive('{"points": [{"x": 0, "y": 0, "z": 0}, ...]}');
+
+// Wo - Represent
+$structure = $kuhul->represent($input);
+
+// Yax - Plan
+$planned = $kuhul->plan($structure, [
+    ['type' => 'convex_hull', 'params' => []],
+    ['type' => 'bounding_box', 'params' => []]
+]);
+
+// Sek - Execute
+$executed = $kuhul->execute($planned);
+
+// Ch'en - Project
+$projected = $kuhul->project($executed);
+
+// Xul - Consolidate
+$result = $kuhul->consolidate($projected);
+6. Micronaut Fold
+php
+$fold = new MicronautGeometryFold('geometry_processor');
+$fold->addNode('input', 'input');
+$fold->addNode('hull', 'process', ['operation' => 'convex_hull']);
+$fold->addNode('bbox', 'process', ['operation' => 'bounding_box']);
+$fold->addNode('output', 'output');
+
+$fold->addEdge('input', 'hull');
+$fold->addEdge('input', 'bbox');
+$fold->addEdge('hull', 'output');
+$fold->addEdge('bbox', 'output');
+
+$result = $fold->execute(['points' => [...]]);
+7. MCP Integration
+php
+// Register with MCP server
+registerGeometryMcpTools($mcpServer);
+
+// Call via MCP
+$result = $mcpServer->handleHttpRequest([
+    'type' => 'tools/call',
+    'name' => 'geometry_convex_hull',
+    'parameters' => [
+        'points' => [
+            ['x' => 0, 'y' => 0, 'z' => 0],
+            ['x' => 1, 'y' => 0, 'z' => 0],
+            ['x' => 0, 'y' => 1, 'z' => 0],
+            ['x' => 0, 'y' => 0, 'z' => 1]
+        ]
+    ]
+]);
+📋 Feature Matrix
+Feature	Class	Status
+Vectors (2D/3D/4D)	Vector	✅
+Matrices (2D/3D/4D)	Matrix	✅
+Quaternions	Quaternion	✅
+Geometric Algebra	Multivector	✅
+AABB	AABB	✅
+Bounding Sphere	Sphere	✅
+Raycasting	Ray	✅
+Convex Hull	ConvexHull	✅
+Delaunay Triangulation	DelaunayTriangulation	✅
+Bezier Curves	BezierCurve	✅
+Catmull-Rom Splines	CatmullRomSpline	✅
+K'UHUL Integration	KuhulGeometry	✅
+Micronaut Integration	MicronautGeometryFold	✅
+MCP Tools	registerGeometryMcpTools	✅
+The boundaries are permanent. No further refinement possible. 🚀
+
 
 
 
