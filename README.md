@@ -3266,6 +3266,7 @@ $result = $mcpServer->handleHttpRequest([
 ```
 
 ### 📋 Feature Matrix
+```
 Feature	Class	Status
 Vectors (2D/3D/4D)	Vector	✅
 Matrices (2D/3D/4D)	Matrix	✅
@@ -3282,7 +3283,7 @@ K'UHUL Integration	KuhulGeometry	✅
 Micronaut Integration	MicronautGeometryFold	✅
 MCP Tools	registerGeometryMcpTools	✅
 The boundaries are permanent. No further refinement possible. 🚀
-
+```
 
 
 
