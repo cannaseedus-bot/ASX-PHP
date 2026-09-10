@@ -1,0 +1,177 @@
+// PHP Grammar - Parsing Expression Grammar
+// Compatible with PHP 8.x syntax
+
+// Root rule
+Program <- (Statement / _)*
+
+// Whitespace and comments
+_ <- [ \t\n\r]*
+Comment <- '//' (![\n] .)* / '/*' ( !'*/' . )* '*/' / '#' (![\n] .)*
+S <- [ \t\n\r]+
+
+// Basic tokens
+Identifier <- [a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*
+Integer <- '0' / [1-9][0-9]* / '0x' [0-9a-fA-F]+ / '0b' [01]+ / '0o' [0-7]+
+Float <- [0-9]+ '.' [0-9]+ ([eE] [+-]? [0-9]+)? / [0-9]+ [eE] [+-]? [0-9]+
+String <- '\'' (!['\\] .)* '\'' / '"' (!["\\] .)* '"' / Heredoc / Nowdoc
+Boolean <- 'true' / 'false'
+Null <- 'null'
+
+// Operators
+UnaryOp <- '!' / '~' / '+' / '-' / '@'
+BinaryOp <- '||' / '&&' / '|' / '&' / '^' / '.' / '+' / '-' / '*' / '/' / '%'
+           / '==' / '!=' / '===' / '!==' / '<' / '>' / '<=' / '>=' / '<=>' / '??'
+           / '**' / '>>' / '<<' / 'and' / 'or' / 'xor'
+AssignOp <- '=' / '+=' / '-=' / '*=' / '/=' / '.=' / '%=' / '&=' / '|='
+          / '^=' / '<<=' / '>>=' / '**=' / '??='
+IncOp <- '++' / '--'
+Ternary <- '?' _? Expression _? ':' _? Expression
+
+// Expressions
+Expression <- AssignmentExpression
+AssignmentExpression <- ( '&'? (Variable / 'list' '(' VariableList ')') AssignOp Expression ) / ConditionalExpression
+ConditionalExpression <- LogicalOrExpression ('?' _? Expression? _? ':' _? Expression?)?
+LogicalOrExpression <- LogicalAndExpression ( ('or' / '||') _? LogicalAndExpression )*
+LogicalAndExpression <- BitwiseOrExpression ( ('and' / '&&') _? BitwiseOrExpression )*
+BitwiseOrExpression <- BitwiseXorExpression ( '|' _? BitwiseXorExpression )*
+BitwiseXorExpression <- BitwiseAndExpression ( '^' _? BitwiseAndExpression )*
+BitwiseAndExpression <- EqualityExpression ( '&' _? EqualityExpression )*
+EqualityExpression <- ComparativeExpression ( ('==' / '!=' / '===' / '!==' / '<=>') _? ComparativeExpression )*
+ComparativeExpression <- ShiftExpression ( ('<' / '>' / '<=' / '>=') _? ShiftExpression )*
+ShiftExpression <- AdditiveExpression ( ('<<' / '>>') _? AdditiveExpression )*
+AdditiveExpression <- MultiplicativeExpression ( ('+' / '-' / '.') _? MultiplicativeExpression )*
+MultiplicativeExpression <- ExponentiationExpression ( ('*' / '/' / '%') _? ExponentiationExpression )*
+ExponentiationExpression <- UnaryExpression ( '**' _? UnaryExpression )*
+UnaryExpression <- UnaryOp _? UnaryExpression / PostfixExpression
+PostfixExpression <- PrimaryExpression ( PostfixOp )*
+PostfixOp <- '[' _? Expression _? ']' / '{' _? Expression _? '}' / '->' _? Identifier / '?->' _? Identifier 
+           / '::' _? Identifier / '(' _? ExpressionList? _? ')' / IncOp
+PrimaryExpression <- Variable / Literal / '(' _? Expression _? ')' 
+                   / 'new' _! ClassName ( '(' _? ArgumentList? _? ')' )?
+                   / 'clone' _! Variable
+                   / 'yield' _! Expression? / 'yield' _! 'from' _! Expression
+                   / 'match' _! '(' _? Expression _? ')' _! '{' _? MatchArmList _? '}'
+                   / 'fn' _! '(' _? ParameterList? _? ')' _? (':' _? Type)? _! '=>' _! Expression
+                   / ArrayCreation / LambdaFunction / AnonymousClass
+
+// Variables
+Variable <- '$' (Identifier / VariableVariable)
+VariableVariable <- '{' _? Expression _? '}' / Identifier
+VariableList <- Variable ( ',' _? Variable )*
+
+// Array creation
+ArrayCreation <- 'array' '(' _? ArrayItemList? _? ')' / '[' _? ArrayItemList? _? ']'
+ArrayItemList <- ArrayItem ( ',' _? ArrayItem )* ','?
+ArrayItem <- Expression? ('=>' _? Expression)? / '...' _! Expression
+
+// Types
+Type <- SimpleType / '?' _? SimpleType / 'array' / 'callable' / 'iterable' / 'void' / 'never'
+       / 'mixed' / 'false' / 'null' / 'true' / 'object' / 'parent' / 'self' / 'static'
+SimpleType <- 'int' / 'float' / 'string' / 'bool' / 'resource'
+TypeDeclaration <- ':' _! Type
+NullableType <- '?' _! Type
+UnionType <- Type ( '|' _! Type )+
+IntersectionType <- Type ( '&' _! Type )+
+TypeList <- Type ( ',' _! Type )*
+
+// Statements
+Statement <- ExpressionStatement / CompoundStatement / SelectionStatement / IterationStatement
+           / JumpStatement / DeclarationStatement / NamespaceStatement / UseStatement
+           / DeclareStatement / EmptyStatement / TryStatement / InlineHtml
+EmptyStatement <- ';'
+ExpressionStatement <- Expression _! ';'
+CompoundStatement <- '{' _? Statement* _? '}'
+SelectionStatement <- IfStatement / SwitchStatement
+IfStatement <- 'if' _! '(' _? Expression _? ')' _! Statement ( 'elseif' _! '(' _? Expression _? ')' _! Statement )* ( 'else' _! Statement )?
+SwitchStatement <- 'switch' _! '(' _? Expression _? ')' _! '{' _? CaseStatement* _? '}'
+CaseStatement <- 'case' _! Expression _! ':' _? Statement* / 'default' _! ':' _? Statement*
+IterationStatement <- WhileStatement / DoStatement / ForStatement / ForeachStatement
+WhileStatement <- 'while' _! '(' _? Expression _? ')' _! Statement
+DoStatement <- 'do' _! Statement _! 'while' _! '(' _? Expression _? ')' _! ';'
+ForStatement <- 'for' _! '(' _? Expression? _! ';' _? Expression? _! ';' _? Expression? _! ')' _! Statement
+ForeachStatement <- 'foreach' _! '(' _? Expression _! 'as' _! ('&'? Variable) ( '=>' _! ('&'? Variable) )? _! ')' _! Statement
+JumpStatement <- GotoStatement / ContinueStatement / BreakStatement / ReturnStatement / ThrowStatement
+GotoStatement <- 'goto' _! Label _! ';'
+ContinueStatement <- 'continue' _! Expression? _! ';'
+BreakStatement <- 'break' _! Expression? _! ';'
+ReturnStatement <- 'return' _! Expression? _! ';'
+ThrowStatement <- 'throw' _! Expression _! ';'
+
+// Declarations
+DeclarationStatement <- FunctionDeclaration / ClassDeclaration / InterfaceDeclaration 
+                      / TraitDeclaration / ConstDeclaration / GlobalDeclaration 
+                      / StaticDeclaration / PropertyDeclaration
+NamespaceStatement <- 'namespace' _! Identifier? _! ';' / 'namespace' _! Identifier _! '{' _? Statement* _? '}'
+UseStatement <- 'use' _! UseItem ( ',' _! UseItem )* _! ';' / 'use' _! UseItem ( ',' _! UseItem )* _! '{' _? UseItem* _? '}'
+UseItem <- ('function' / 'const')? _! Identifier ('as' _! Identifier)?
+DeclareStatement <- 'declare' _! '(' _? DeclareItem ( ',' _? DeclareItem )* _? ')' _! Statement
+DeclareItem <- 'ticks' _! '=' _! Expression / 'encoding' _! '=' _! String / 'strict_types' _! '=' _! Integer
+TryStatement <- 'try' _! CompoundStatement ( CatchStatement+ / FinallyStatement ) / 'try' _! CompoundStatement FinallyStatement
+CatchStatement <- 'catch' _! '(' _? Type _? Variable? _? ')' _! CompoundStatement
+FinallyStatement <- 'finally' _! CompoundStatement
+
+// Functions
+FunctionDeclaration <- ('function' _!)? FunctionName '(' _? ParameterList? _? ')' _? (':' _! ('?'? Type))? _! CompoundStatement
+FunctionName <- Identifier / '{' _? Expression _? '}'
+ParameterList <- Parameter ( ',' _? Parameter )*
+Parameter <- ('private' / 'protected' / 'public')? _! 'readonly'? _! Type? _! '&'? _! '...'? _! Variable ('=' _! Expression)?
+LambdaFunction <- 'function' _! '&'? '(' _? ParameterList? _? ')' _? (':' _! ('?'? Type))? _? ('use' _! '(' _? VariableList _? ')')? _! CompoundStatement
+               / 'fn' _! '(' _? ParameterList? _? ')' _? (':' _! ('?'? Type))? _! '=>' _! Expression
+
+// Classes
+ClassDeclaration <- ('abstract' / 'final')? _! 'class' _! Identifier ('extends' _! ClassName)? ('implements' _! ClassInterfaceList)? _! ClassBody
+AnonymousClass <- 'new' _! ('class')? _! ('(' _? ArgumentList? _? ')')? ('extends' _! ClassName)? ('implements' _! ClassInterfaceList)? _! ClassBody
+ClassBody <- '{' _? ClassMember* _? '}'
+ClassMember <- PropertyDeclaration / MethodDeclaration / ConstDeclaration / TraitUse
+PropertyDeclaration <- ('private' / 'protected' / 'public')? _! 'static'? _! 'readonly'? _! Type? _! PropertyVariable ('=' _! Expression)? _! ';'
+MethodDeclaration <- ('abstract' / 'final')? _! ('private' / 'protected' / 'public')? _! 'static'? _! FunctionDeclaration
+ConstDeclaration <- ('private' / 'protected' / 'public')? _! 'const' _! ConstItem ( ',' _! ConstItem )* _! ';'
+ConstItem <- Identifier '=' _! Expression
+TraitUse <- 'use' _! TraitName ( ',' _! TraitName )* ('{' _? TraitUseItem* _? '}')? _! ';'
+TraitUseItem <- 'insteadof' / 'as' _! ('private' / 'protected' / 'public')? _! Identifier / 'as' _! Identifier / 'insteadof' _! Identifier '::' _! Identifier
+ClassInterfaceList <- Identifier ( ',' _! Identifier )*
+
+// Interfaces and Traits
+InterfaceDeclaration <- 'interface' _! Identifier ('extends' _! ClassInterfaceList)? _! ClassBody
+TraitDeclaration <- 'trait' _! Identifier _! ClassBody
+
+// Names
+ClassName <- Identifier ('::' _! ClassName)? / NamespaceName
+NamespaceName <- Identifier ('\\' _! Identifier)*
+FunctionName <- NamespaceName / '{' _? Expression _? '}'
+TraitName <- NamespaceName
+
+// Match expressions
+MatchArmList <- MatchArm ( ',' _? MatchArm )* ','?
+MatchArm <- MatchArmExpression '=>' _! Expression
+MatchArmExpression <- Expression / 'default'
+
+// Arguments
+ArgumentList <- Argument ( ',' _? Argument )*
+Argument <- '...'? _! Expression / Variable? ':' _! Expression
+
+// Heredoc and Nowdoc
+Heredoc <- HeredocStart _? Newline HeredocContent? HeredocEnd
+HeredocStart <- '<<<' _! Label
+HeredocEnd <- Label
+Nowdoc <- NowdocStart _? Newline NowdocContent? NowdocEnd
+NowdocStart <- '<<<\'' _! Label '\''
+NowdocEnd <- Label
+
+// Attributes
+Attribute <- '#[' _? AttributeItem ( ',' _? AttributeItem )* _? ']'
+AttributeItem <- NamespaceName ('(' _? ArgumentList? _? ')')?
+
+// Enums
+EnumDeclaration <- 'enum' _! Identifier ':' _! Type ('implements' _! ClassInterfaceList)? _! EnumBody
+EnumBody <- '{' _? EnumCase* ClassMember* _? '}'
+EnumCase <- 'case' _! Identifier ('=' _! Expression)? _! ';'
+
+// Readonly class
+ReadonlyClass <- 'readonly' _! 'class' _! Identifier ('extends' _! ClassName)? ('implements' _! ClassInterfaceList)? _! ClassBody
+
+// Helper rules
+Label <- Identifier
+Newline <- '\n' / '\r\n'
+HeredocContent <- (!HeredocEnd .)*
+NowdocContent <- (!NowdocEnd .)*

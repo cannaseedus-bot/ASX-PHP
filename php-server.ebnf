@@ -1,0 +1,191 @@
+(* PHP Grammar - Extended Backus-Naur Form *)
+(* Compatible with PHP 8.x syntax *)
+
+(* Root level *)
+program = { statement } ;
+
+(* Basic tokens *)
+identifier = letter { letter | digit | "_" } ;
+label = identifier ;
+literal = integer | float | string | boolean | null ;
+integer = "0" | digit { digit } | "0x" hex { hex } | "0b" binary { binary } | "0o" octal { octal } ;
+float = digit { digit } "." digit { digit } [ exponent ] | digit { digit } exponent ;
+exponent = ("e" | "E") [ "+" | "-" ] digit { digit } ;
+string = "'" { character - "'" } "'" | '"' { character - '"' } '"' | heredoc | nowdoc ;
+heredoc = "<<<" label newline { any } newline label ";" ;
+nowdoc = "<<<'" label "'" newline { any } newline label ";" ;
+boolean = "true" | "false" ;
+null = "null" ;
+letter = "A" | ... | "Z" | "a" | ... | "z" ;
+digit = "0" | ... | "9" ;
+hex = digit | "A" | ... | "F" | "a" | ... | "f" ;
+binary = "0" | "1" ;
+octal = "0" | ... | "7" ;
+
+(* Operators *)
+unary_operator = "!" | "~" | "+" | "-" | "@" ;
+binary_operator = "||" | "&&" | "|" | "&" | "^" | "." | "+" | "-" | "*" | "/" | "%" 
+                | "==" | "!=" | "===" | "!==" | "<" | ">" | "<=" | ">=" | "<=>" | "??" 
+                | "**" | ">>" | "<<" | "and" | "or" | "xor" ;
+assignment_operator = "=" | "+=" | "-=" | "*=" | "/=" | ".=" | "%=" | "&=" | "|=" 
+                    | "^=" | "<<=" | ">>=" | "**=" | "??=" ;
+increment_operator = "++" | "--" ;
+ternary_operator = "?" ":" ;
+
+(* Expressions *)
+expression = assignment_expression ;
+assignment_expression = [ "&" ] ( variable | "list" "(" variable_list ")" ) assignment_operator expression
+                      | conditional_expression ;
+conditional_expression = logical_or_expression [ "?" expression ":" expression ]
+                       | logical_or_expression [ "?" ":" expression ] ;
+logical_or_expression = logical_and_expression { ("or" | "||") logical_and_expression } ;
+logical_and_expression = bitwise_or_expression { ("and" | "&&") bitwise_or_expression } ;
+bitwise_or_expression = bitwise_xor_expression { "|" bitwise_xor_expression } ;
+bitwise_xor_expression = bitwise_and_expression { "^" bitwise_and_expression } ;
+bitwise_and_expression = equality_expression { "&" equality_expression } ;
+equality_expression = comparative_expression { ("==" | "!=" | "===" | "!==" | "<=>") comparative_expression } ;
+comparative_expression = shift_expression { ("<" | ">" | "<=" | ">=") shift_expression } ;
+shift_expression = additive_expression { ("<<" | ">>") additive_expression } ;
+additive_expression = multiplicative_expression { ("+" | "-" | ".") multiplicative_expression } ;
+multiplicative_expression = exponentiation_expression { ("*" | "/" | "%") exponentiation_expression } ;
+exponentiation_expression = unary_expression { "**" unary_expression } ;
+unary_expression = unary_operator unary_expression
+                 | postfix_expression ;
+postfix_expression = primary_expression { postfix_operator } ;
+postfix_operator = "[" expression "]" | "{" expression "}" | "->" identifier | "?->" identifier 
+                 | "::" identifier | "(" [ expression_list ] ")" | "++" | "--" ;
+primary_expression = variable | literal | "(" expression ")" 
+                   | "new" class_name [ "(" [ argument_list ] ")" ] 
+                   | "clone" variable 
+                   | "yield" [ expression ] | "yield" "from" expression 
+                   | "match" "(" expression ")" "{" match_arm_list "}" 
+                   | "fn" "(" [ parameter_list ] ")" [ ":" type ] "=>" expression 
+                   | array_creation | lambda_function | anonymous_class ;
+
+(* Variables *)
+variable = "$" [ variable_name ] ;
+variable_name = identifier | variable_variable ;
+variable_variable = "{" expression "}" | identifier ;
+array_creation = "array" "(" [ array_item_list ] ")" | "[" [ array_item_list ] "]" ;
+array_item_list = array_item { "," array_item } [ "," ] ;
+array_item = [ expression ] [ "=>" expression ] | "..." expression ;
+
+(* Types *)
+type = simple_type | "?" simple_type | "array" | "callable" | "iterable" | "void" | "never" 
+     | "mixed" | "false" | "null" | "true" | "object" | "parent" | "self" | "static" 
+     | "?array" | "?callable" | "?iterable" | "?void" | "?never" | "?mixed" 
+     | "?false" | "?null" | "?true" | "?object" | "?parent" | "?self" | "?static" ;
+simple_type = "int" | "float" | "string" | "bool" | "resource" ;
+type_declaration = ":" type ;
+nullable_type = "?" type ;
+union_type = type { "|" type } ;
+intersection_type = type { "&" type } ;
+type_list = type { "," type } ;
+
+(* Statements *)
+statement = expression_statement | compound_statement | selection_statement 
+          | iteration_statement | jump_statement | declaration_statement 
+          | namespace_statement | use_statement | declare_statement 
+          | empty_statement | try_statement | inline_html ;
+
+empty_statement = ";" ;
+expression_statement = expression ";" ;
+compound_statement = "{" { statement } "}" ;
+selection_statement = if_statement | switch_statement ;
+if_statement = "if" "(" expression ")" statement [ "elseif" "(" expression ")" statement ]* [ "else" statement ] ;
+switch_statement = "switch" "(" expression ")" "{" { case_statement } "}" ;
+case_statement = "case" expression ":" { statement } | "default" ":" { statement } ;
+iteration_statement = while_statement | do_statement | for_statement | foreach_statement ;
+while_statement = "while" "(" expression ")" statement ;
+do_statement = "do" statement "while" "(" expression ")" ";" ;
+for_statement = "for" "(" [ expression ] ";" [ expression ] ";" [ expression ] ")" statement ;
+foreach_statement = "foreach" "(" expression "as" [ "&" ] variable [ "=>" [ "&" ] variable ] ")" statement ;
+jump_statement = goto_statement | continue_statement | break_statement | return_statement | throw_statement ;
+goto_statement = "goto" label ";" ;
+continue_statement = "continue" [ expression ] ";" ;
+break_statement = "break" [ expression ] ";" ;
+return_statement = "return" [ expression ] ";" ;
+throw_statement = "throw" expression ";" ;
+declaration_statement = function_declaration | class_declaration | interface_declaration 
+                      | trait_declaration | const_declaration | global_declaration 
+                      | static_declaration | property_declaration ;
+namespace_statement = "namespace" [ identifier ] ";" | "namespace" identifier "{" { statement } "}" ;
+use_statement = "use" use_item { "," use_item } ";" | "use" use_item { "," use_item } "{" { use_item } "}" ;
+use_item = [ "function" | "const" ] identifier [ "as" identifier ] ;
+declare_statement = "declare" "(" declare_item { "," declare_item } ")" statement ;
+declare_item = "ticks" "=" expression | "encoding" "=" string | "strict_types" "=" integer ;
+try_statement = "try" compound_statement ( catch_statement { catch_statement } | finally_statement ) 
+              | "try" compound_statement finally_statement ;
+catch_statement = "catch" "(" type [ variable ] ")" compound_statement ;
+finally_statement = "finally" compound_statement ;
+
+(* Functions and methods *)
+function_declaration = [ "function" ] function_name "(" [ parameter_list ] ")" [ ":" [ "?" ] type ] compound_statement ;
+function_name = identifier | "{" expression "}" ;
+parameter_list = parameter { "," parameter } ;
+parameter = [ "private" | "protected" | "public" ] [ "readonly" ] [ type ] [ "&" ] [ "..." ] variable [ "=" expression ] ;
+lambda_function = "function" [ "&" ] "(" [ parameter_list ] ")" [ ":" [ "?" ] type ] [ "use" "(" variable_list ")" ] compound_statement 
+                | "fn" "(" [ parameter_list ] ")" [ ":" [ "?" ] type ] "=>" expression ;
+variable_list = variable { "," variable } ;
+
+(* Classes and objects *)
+class_declaration = [ "abstract" | "final" ] "class" identifier [ "extends" class_name ] [ "implements" class_interface_list ] class_body ;
+anonymous_class = "new" [ "class" ] [ "(" [ argument_list ] ")" ] [ "extends" class_name ] [ "implements" class_interface_list ] class_body ;
+class_body = "{" { class_member } "}" ;
+class_member = property_declaration | method_declaration | const_declaration | trait_use ;
+property_declaration = [ "private" | "protected" | "public" ] [ "static" ] [ "readonly" ] [ type ] property_variable [ "=" expression ] ";" ;
+method_declaration = [ "abstract" | "final" ] [ "private" | "protected" | "public" ] [ "static" ] function_declaration ;
+const_declaration = [ "private" | "protected" | "public" ] "const" const_item { "," const_item } ";" ;
+const_item = identifier "=" expression ;
+trait_use = "use" trait_name { "," trait_name } [ "{" [ trait_use_item { "," trait_use_item } ] "}" ] ";" ;
+trait_use_item = "insteadof" | "as" [ "private" | "protected" | "public" ] identifier 
+               | "as" identifier | "insteadof" identifier "::" identifier ;
+class_interface_list = identifier { "," identifier } ;
+interface_declaration = "interface" identifier [ "extends" class_interface_list ] class_body ;
+trait_declaration = "trait" identifier class_body ;
+
+(* Names and namespaces *)
+class_name = identifier [ "::" class_name ] | namespace_name ;
+namespace_name = identifier { "\\" identifier } ;
+function_name = namespace_name | "{" expression "}" ;
+trait_name = namespace_name ;
+variable_name = identifier | variable_variable ;
+
+(* Match expressions *)
+match_arm_list = match_arm { "," match_arm } [ "," ] ;
+match_arm = match_arm_expression "=>" expression ;
+match_arm_expression = expression | "default" ;
+
+(* Argument lists *)
+argument_list = argument { "," argument } ;
+argument = [ "..." ] expression | [ variable ] ":" expression ;
+
+(* Heredoc and Nowdoc *)
+heredoc = heredoc_start newline { any } heredoc_end ;
+heredoc_start = "<<<" label ;
+heredoc_end = label ;
+nowdoc = nowdoc_start newline { any } nowdoc_end ;
+nowdoc_start = "<<<'" label "'" ;
+nowdoc_end = label ;
+
+(* Attributes *)
+attribute = "#[" attribute_item { "," attribute_item } "]" ;
+attribute_item = namespace_name [ "(" [ argument_list ] ")" ] ;
+
+(* Enums *)
+enum_declaration = "enum" identifier [ ":" type ] [ "implements" class_interface_list ] enum_body ;
+enum_body = "{" { enum_case } { class_member } "}" ;
+enum_case = "case" identifier [ "=" expression ] ";" ;
+
+(* Readonly class *)
+readonly_class = "readonly" "class" identifier [ "extends" class_name ] [ "implements" class_interface_list ] class_body ;
+
+(* DNF types *)
+dnf_type = ( ( type { "|" type } ) | type ) "&" ( ( type { "|" type } ) | type ) ;
+
+(* Mixed type *)
+mixed_type = "mixed" ;
+
+(* Attribute groups *)
+attribute_group = "#[" attribute_list "]" ;
+attribute_list = attribute { "," attribute } ;

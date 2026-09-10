@@ -1,0 +1,627 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://php.net/schema/grammar.schema.json",
+  "title": "PHP Grammar Schema",
+  "description": "JSON Schema for PHP code structure",
+  "type": "object",
+  "definitions": {
+    "Program": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "program" },
+        "statements": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Statement" }
+        }
+      },
+      "required": ["type", "statements"]
+    },
+    "Statement": {
+      "oneOf": [
+        { "$ref": "#/definitions/ExpressionStatement" },
+        { "$ref": "#/definitions/CompoundStatement" },
+        { "$ref": "#/definitions/IfStatement" },
+        { "$ref": "#/definitions/SwitchStatement" },
+        { "$ref": "#/definitions/WhileStatement" },
+        { "$ref": "#/definitions/DoStatement" },
+        { "$ref": "#/definitions/ForStatement" },
+        { "$ref": "#/definitions/ForeachStatement" },
+        { "$ref": "#/definitions/GotoStatement" },
+        { "$ref": "#/definitions/ContinueStatement" },
+        { "$ref": "#/definitions/BreakStatement" },
+        { "$ref": "#/definitions/ReturnStatement" },
+        { "$ref": "#/definitions/ThrowStatement" },
+        { "$ref": "#/definitions/FunctionDeclaration" },
+        { "$ref": "#/definitions/ClassDeclaration" },
+        { "$ref": "#/definitions/InterfaceDeclaration" },
+        { "$ref": "#/definitions/TraitDeclaration" },
+        { "$ref": "#/definitions/NamespaceStatement" },
+        { "$ref": "#/definitions/UseStatement" },
+        { "$ref": "#/definitions/DeclareStatement" },
+        { "$ref": "#/definitions/TryStatement" },
+        { "$ref": "#/definitions/EmptyStatement" }
+      ]
+    },
+    "ExpressionStatement": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "expression_statement" },
+        "expression": { "$ref": "#/definitions/Expression" }
+      },
+      "required": ["type", "expression"]
+    },
+    "CompoundStatement": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "compound_statement" },
+        "statements": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Statement" }
+        }
+      },
+      "required": ["type", "statements"]
+    },
+    "Expression": {
+      "oneOf": [
+        { "$ref": "#/definitions/AssignmentExpression" },
+        { "$ref": "#/definitions/ConditionalExpression" },
+        { "$ref": "#/definitions/LogicalOrExpression" },
+        { "$ref": "#/definitions/LogicalAndExpression" },
+        { "$ref": "#/definitions/BitwiseOrExpression" },
+        { "$ref": "#/definitions/BitwiseXorExpression" },
+        { "$ref": "#/definitions/BitwiseAndExpression" },
+        { "$ref": "#/definitions/EqualityExpression" },
+        { "$ref": "#/definitions/ComparativeExpression" },
+        { "$ref": "#/definitions/ShiftExpression" },
+        { "$ref": "#/definitions/AdditiveExpression" },
+        { "$ref": "#/definitions/MultiplicativeExpression" },
+        { "$ref": "#/definitions/ExponentiationExpression" },
+        { "$ref": "#/definitions/UnaryExpression" },
+        { "$ref": "#/definitions/PostfixExpression" },
+        { "$ref": "#/definitions/PrimaryExpression" }
+      ]
+    },
+    "AssignmentExpression": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "assignment" },
+        "operator": { "type": "string", "enum": ["=", "+=", "-=", "*=", "/=", ".=", "%=", "&=", "|=", "^=", "<<=", ">>=", "**=", "??="] },
+        "left": { "$ref": "#/definitions/Variable" },
+        "right": { "$ref": "#/definitions/Expression" },
+        "by_ref": { "type": "boolean", "default": false }
+      },
+      "required": ["type", "operator", "left", "right"]
+    },
+    "ConditionalExpression": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "conditional" },
+        "condition": { "$ref": "#/definitions/Expression" },
+        "then": { "$ref": "#/definitions/Expression" },
+        "else": { "$ref": "#/definitions/Expression" },
+        "elvis": { "type": "boolean", "default": false }
+      },
+      "required": ["type", "condition"]
+    },
+    "Variable": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "variable" },
+        "name": { "type": "string" },
+        "by_ref": { "type": "boolean", "default": false }
+      },
+      "required": ["type", "name"]
+    },
+    "Literal": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "literal" },
+        "value": { "type": ["string", "number", "boolean", "null"] },
+        "literal_type": { "type": "string", "enum": ["integer", "float", "string", "boolean", "null"] }
+      },
+      "required": ["type", "value", "literal_type"]
+    },
+    "IfStatement": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "if" },
+        "condition": { "$ref": "#/definitions/Expression" },
+        "then": { "$ref": "#/definitions/Statement" },
+        "elseif": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "condition": { "$ref": "#/definitions/Expression" },
+              "statement": { "$ref": "#/definitions/Statement" }
+            },
+            "required": ["condition", "statement"]
+          }
+        },
+        "else": { "$ref": "#/definitions/Statement" }
+      },
+      "required": ["type", "condition", "then"]
+    },
+    "SwitchStatement": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "switch" },
+        "expression": { "$ref": "#/definitions/Expression" },
+        "cases": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "type": { "const": "case" },
+                  "value": { "$ref": "#/definitions/Expression" },
+                  "statements": {
+                    "type": "array",
+                    "items": { "$ref": "#/definitions/Statement" }
+                  }
+                },
+                "required": ["type", "value", "statements"]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "type": { "const": "default" },
+                  "statements": {
+                    "type": "array",
+                    "items": { "$ref": "#/definitions/Statement" }
+                  }
+                },
+                "required": ["type", "statements"]
+              }
+            ]
+          }
+        }
+      },
+      "required": ["type", "expression", "cases"]
+    },
+    "FunctionDeclaration": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "function" },
+        "name": { "type": "string" },
+        "params": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Parameter" }
+        },
+        "return_type": { "$ref": "#/definitions/Type" },
+        "body": { "$ref": "#/definitions/CompoundStatement" },
+        "attributes": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Attribute" }
+        },
+        "by_ref": { "type": "boolean", "default": false }
+      },
+      "required": ["type", "name", "params", "body"]
+    },
+    "Parameter": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "parameter" },
+        "name": { "type": "string" },
+        "type": { "$ref": "#/definitions/Type" },
+        "default": { "$ref": "#/definitions/Expression" },
+        "by_ref": { "type": "boolean", "default": false },
+        "variadic": { "type": "boolean", "default": false },
+        "visibility": { "type": "string", "enum": ["private", "protected", "public"] },
+        "readonly": { "type": "boolean", "default": false }
+      },
+      "required": ["type", "name"]
+    },
+    "Type": {
+      "type": "object",
+      "properties": {
+        "type": { "type": "string" },
+        "nullable": { "type": "boolean", "default": false },
+        "types": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["int", "float", "string", "bool", "array", "callable", "iterable", "void", "never", "mixed", "false", "null", "true", "object", "parent", "self", "static"]
+          }
+        }
+      },
+      "required": ["type"]
+    },
+    "ClassDeclaration": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "class" },
+        "name": { "type": "string" },
+        "extends": { "type": "string" },
+        "implements": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "body": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              { "$ref": "#/definitions/PropertyDeclaration" },
+              { "$ref": "#/definitions/MethodDeclaration" },
+              { "$ref": "#/definitions/ConstDeclaration" },
+              { "$ref": "#/definitions/TraitUse" }
+            ]
+          }
+        },
+        "abstract": { "type": "boolean", "default": false },
+        "final": { "type": "boolean", "default": false },
+        "readonly": { "type": "boolean", "default": false },
+        "attributes": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Attribute" }
+        }
+      },
+      "required": ["type", "name", "body"]
+    },
+    "PropertyDeclaration": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "property" },
+        "name": { "type": "string" },
+        "type": { "$ref": "#/definitions/Type" },
+        "default": { "$ref": "#/definitions/Expression" },
+        "visibility": { "type": "string", "enum": ["private", "protected", "public"] },
+        "static": { "type": "boolean", "default": false },
+        "readonly": { "type": "boolean", "default": false },
+        "attributes": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Attribute" }
+        }
+      },
+      "required": ["type", "name"]
+    },
+    "MethodDeclaration": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "method" },
+        "name": { "type": "string" },
+        "params": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Parameter" }
+        },
+        "return_type": { "$ref": "#/definitions/Type" },
+        "body": { "$ref": "#/definitions/CompoundStatement" },
+        "visibility": { "type": "string", "enum": ["private", "protected", "public"] },
+        "static": { "type": "boolean", "default": false },
+        "abstract": { "type": "boolean", "default": false },
+        "final": { "type": "boolean", "default": false },
+        "attributes": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Attribute" }
+        }
+      },
+      "required": ["type", "name", "params"]
+    },
+    "ConstDeclaration": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "const" },
+        "name": { "type": "string" },
+        "value": { "$ref": "#/definitions/Expression" },
+        "visibility": { "type": "string", "enum": ["private", "protected", "public"] },
+        "attributes": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Attribute" }
+        }
+      },
+      "required": ["type", "name", "value"]
+    },
+    "TraitUse": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "trait_use" },
+        "traits": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "adaptations": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "type": { "const": "insteadof" },
+                  "trait": { "type": "string" },
+                  "method": { "type": "string" },
+                  "target": { "type": "string" }
+                },
+                "required": ["type", "trait", "method", "target"]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "type": { "const": "as" },
+                  "trait": { "type": "string" },
+                  "method": { "type": "string" },
+                  "visibility": { "type": "string", "enum": ["private", "protected", "public"] },
+                  "alias": { "type": "string" }
+                },
+                "required": ["type", "method"]
+              }
+            ]
+          }
+        }
+      },
+      "required": ["type", "traits"]
+    },
+    "ForStatement": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "for" },
+        "init": { "$ref": "#/definitions/Expression" },
+        "condition": { "$ref": "#/definitions/Expression" },
+        "increment": { "$ref": "#/definitions/Expression" },
+        "body": { "$ref": "#/definitions/Statement" }
+      },
+      "required": ["type", "body"]
+    },
+    "ForeachStatement": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "foreach" },
+        "expression": { "$ref": "#/definitions/Expression" },
+        "key": { "$ref": "#/definitions/Variable" },
+        "value": { "$ref": "#/definitions/Variable" },
+        "body": { "$ref": "#/definitions/Statement" },
+        "by_ref": { "type": "boolean", "default": false }
+      },
+      "required": ["type", "expression", "value", "body"]
+    },
+    "TryStatement": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "try" },
+        "body": { "$ref": "#/definitions/CompoundStatement" },
+        "catches": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string" },
+              "variable": { "$ref": "#/definitions/Variable" },
+              "body": { "$ref": "#/definitions/CompoundStatement" }
+            },
+            "required": ["type", "body"]
+          }
+        },
+        "finally": { "$ref": "#/definitions/CompoundStatement" }
+      },
+      "required": ["type", "body"]
+    },
+    "ReturnStatement": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "return" },
+        "expression": { "$ref": "#/definitions/Expression" }
+      },
+      "required": ["type"]
+    },
+    "ThrowStatement": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "throw" },
+        "expression": { "$ref": "#/definitions/Expression" }
+      },
+      "required": ["type", "expression"]
+    },
+    "NamespaceStatement": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "namespace" },
+        "name": { "type": ["string", "null"] },
+        "statements": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Statement" }
+        }
+      },
+      "required": ["type"]
+    },
+    "UseStatement": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "use" },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "enum": ["class", "function", "const"] },
+              "name": { "type": "string" },
+              "alias": { "type": "string" }
+            },
+            "required": ["name"]
+          }
+        }
+      },
+      "required": ["type", "items"]
+    },
+    "DeclareStatement": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "declare" },
+        "directives": {
+          "type": "object",
+          "properties": {
+            "ticks": { "type": "integer" },
+            "encoding": { "type": "string" },
+            "strict_types": { "type": "integer", "enum": [0, 1] }
+          }
+        },
+        "statement": { "$ref": "#/definitions/Statement" }
+      },
+      "required": ["type", "directives"]
+    },
+    "Attribute": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "arguments": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Argument" }
+        }
+      },
+      "required": ["name"]
+    },
+    "Argument": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "value": { "$ref": "#/definitions/Expression" }
+          },
+          "required": ["value"]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "value": { "$ref": "#/definitions/Expression" },
+            "spread": { "type": "boolean", "default": false }
+          },
+          "required": ["value"]
+        }
+      ]
+    },
+    "EmptyStatement": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "empty" }
+      },
+      "required": ["type"]
+    },
+    "GotoStatement": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "goto" },
+        "label": { "type": "string" }
+      },
+      "required": ["type", "label"]
+    },
+    "ContinueStatement": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "continue" },
+        "level": { "type": "integer" }
+      },
+      "required": ["type"]
+    },
+    "BreakStatement": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "break" },
+        "level": { "type": "integer" }
+      },
+      "required": ["type"]
+    },
+    "WhileStatement": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "while" },
+        "condition": { "$ref": "#/definitions/Expression" },
+        "body": { "$ref": "#/definitions/Statement" }
+      },
+      "required": ["type", "condition", "body"]
+    },
+    "DoStatement": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "do_while" },
+        "condition": { "$ref": "#/definitions/Expression" },
+        "body": { "$ref": "#/definitions/Statement" }
+      },
+      "required": ["type", "condition", "body"]
+    },
+    "InterfaceDeclaration": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "interface" },
+        "name": { "type": "string" },
+        "extends": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "body": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              { "$ref": "#/definitions/MethodDeclaration" },
+              { "$ref": "#/definitions/ConstDeclaration" }
+            ]
+          }
+        },
+        "attributes": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Attribute" }
+        }
+      },
+      "required": ["type", "name", "body"]
+    },
+    "TraitDeclaration": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "trait" },
+        "name": { "type": "string" },
+        "body": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              { "$ref": "#/definitions/PropertyDeclaration" },
+              { "$ref": "#/definitions/MethodDeclaration" },
+              { "$ref": "#/definitions/ConstDeclaration" }
+            ]
+          }
+        },
+        "attributes": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Attribute" }
+        }
+      },
+      "required": ["type", "name", "body"]
+    },
+    "EnumDeclaration": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "enum" },
+        "name": { "type": "string" },
+        "backing_type": { "type": "string", "enum": ["int", "string"] },
+        "implements": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "cases": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "value": { "$ref": "#/definitions/Expression" }
+            },
+            "required": ["name"]
+          }
+        },
+        "body": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              { "$ref": "#/definitions/MethodDeclaration" },
+              { "$ref": "#/definitions/ConstDeclaration" }
+            ]
+          }
+        },
+        "attributes": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Attribute" }
+        }
+      },
+      "required": ["type", "name", "cases"]
+    }
+  },
+  "$ref": "#/definitions/Program"
+}
