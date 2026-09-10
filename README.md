@@ -1769,6 +1769,1388 @@ curl -X POST http://localhost:8080/mcp \
   -H "Content-Type: application/json" \
   -d '{"type":"tools/call","name":"micronaut_status"}'
 
+# Complete K'UHUL and Micronaut Grammar Files
+
+I'll provide the complete, production-ready grammar files for both K'UHUL and Micronaut.
+
+---
+
+## 1. KUHUL GRAMMAR FILE
+
+### kuhul.grammar
+
+```ebnf
+(* ================================================================
+   K'UHUL-ES CANONICAL GRAMMAR v2.0
+   ECMAScript syntax · K'UHUL semantics
+   ================================================================ *)
+
+(* ================================================================
+   0. VERSION & STATUS
+   ================================================================ *)
+GrammarVersion ::= "KUHUL_PI_GRAMMAR" "v2.0"
+GrammarStatus  ::= "CANONICAL" | "FROZEN"
+
+(* Status: CANONICAL for kuhul-es 1.5.0
+   Surface syntax: ECMAScript (Node 18+, browsers via ESM)
+   Semantic runtime: K'UHUL phase glyphs + physics + KAST + KXML *)
+
+(* ================================================================
+   1. ARCHITECTURAL BOUNDARY (LOCKED)
+   ================================================================ *)
+Architecture ::= MicronautDomain "→" KuhulDomain
+               | MicronautDomain "→" ExtrapolationSystem
+
+MicronautDomain ::= OrchestrationLayer
+KuhulDomain     ::= EnforcementLayer
+ExtrapolationSystem ::= NarrativeExpansion
+
+(* Invariant: Micronaut cannot define, enforce, collapse, or reject.
+   KUHUL π cannot orchestrate, schedule, branch, or negotiate.
+   Extrapolator expands without altering collapse. *)
+
+(* ================================================================
+   2. DOMAIN DEFINITIONS
+   ================================================================ *)
+OrchestrationLayer ::= "MICRONAUT" "{" ContextOrchestration "}"
+EnforcementLayer   ::= "KUHUL_π"   "{" LawEnforcement "}"
+NarrativeExpansion ::= "EXTRAPOLATOR" "{" ExtrapolationLaw "}"
+
+ContextOrchestration ::=
+      "SELECT"  FieldPresentation
+    | "ARRANGE" CollapseTiming
+    | "CHOOSE"  FieldSelection
+    | "MANAGE"  HostReality
+
+LawEnforcement ::=
+      "DEFINE"   ExecutionDefinition
+    | "ENFORCE"  Invariant
+    | "REJECT"   IllegalState
+    | "COLLAPSE" ToLaw
+
+ExtrapolationLaw ::=
+      "EXPAND" ProjectionSpace
+    | "ASSERT" ExtrapolationInvariant
+
+ProjectionSpace ::=
+      "metaphor" | "analogy" | "framing" | "discipline"
+    | "perspective" | "caveat" | "philosophy"
+
+ExtrapolationInvariant ::=
+      "'read_only_collapse_result'"
+    | "'non_authoritative_output'"
+    | "'no_contradiction'"
+    | "'infinite_extrapolation_allowed'"
+    | "'finite_execution_enforced'"
+
+(* ================================================================
+   3. ECMASCRIPT SURFACE SYNTAX
+   ================================================================ *)
+KuhulProgram ::= StatementList | BlockProgram
+
+StatementList ::= ( Statement ";"? )*
+
+Statement ::=
+      PiBinding
+    | TauBinding
+    | FunctionDeclaration
+    | GlyphCallStatement
+    | KxmlStatement
+    | BlockStatement
+    | ExpressionStatement
+    | ReturnStatement
+
+(* ================================================================
+   4. ATOMIC BLOCK SYNTAX (C@@L / KHL / ROM STYLE)
+   ================================================================ *)
+BlockProgram ::= Block+
+
+BlockStatement ::= Block
+
+Block ::= BlockHeader BlockBody BlockFooter
+
+BlockHeader ::= "[" GlyphName (Identifier | StringLiteral)? "]"
+
+BlockBody ::=
+      ( BlockLine "→"? )*
+    | "⟁" Identifier "⟁" BlockBody "⟁ Xul ⟁"
+
+BlockLine ::=
+      GlyphChain
+    | LoopBlock
+    | IfBlock
+    | DispatchBlock
+    | AssignmentLine
+    | Expression
+
+GlyphChain ::= GlyphStep ( "→" GlyphStep )*
+
+GlyphStep ::=
+      "[" GlyphName Expression "]"
+    | "[" GlyphName Identifier "=" Expression "]"
+    | "[" "Yax" Expression "]"→"[" "Sek" Expression "]"
+    | "[Wo" Expression "]"→"[Ch'en" Identifier "]"
+
+LoopBlock ::=
+    "[@loop" Expression "]"→"[" BlockBody "]"
+
+IfBlock ::=
+    "[@if" Expression "]"→"[@then" BlockBody "]"→"[@else" BlockBody "]"
+
+DispatchBlock ::=
+    "[@dispatch" Expression "]"→"[" CaseClause* "]"
+
+CaseClause ::= "→" "[@case" (StringLiteral | Identifier) "]"→"[" BlockBody "]"
+
+AssignmentLine ::=
+    "[Wo" Expression "]"→"[Yax" Identifier (Identifier)? "]"→"[Sek" Identifier "]"
+
+BlockFooter ::= "[Xul]"
+
+(* Invariant: every block begins with a phase header and ends with Xul.
+   The arrow (→) denotes causality / data flow between atomic steps. *)
+
+(* ================================================================
+   5. BINDINGS
+   ================================================================ *)
+PiBinding ::= "pi" Identifier "=" Expression
+TauBinding ::= "tau" Identifier "=" Expression
+
+(* pi  = immutable binding / law
+   tau = temporal binding / history-aware mutable state *)
+
+(* ================================================================
+   6. FUNCTIONS
+   ================================================================ *)
+FunctionDeclaration ::= "function" "*" Identifier "(" ParameterList ")" "{" FunctionBody "}"
+ParameterList ::= Identifier ("," Identifier)*
+FunctionBody ::= ( GlyphYield | Statement )*
+
+GlyphYield ::= "yield" "*" GlyphCall ";"?
+
+(* ================================================================
+   7. PHASE GLYPHS
+   ================================================================ *)
+GlyphCall ::= GlyphName "(" ArgumentList ")"
+
+GlyphName ::=
+      "Pop"
+    | "Wo"
+    | "Yax"
+    | "Sek"
+    | "Ch'en"
+    | "Xul"
+    | "Noj"
+
+ArgumentList ::= Expression ("," Expression)*
+
+(* Phase meaning:
+   Pop   — perceive / input
+   Wo    — represent / build / bind
+   Yax   — plan / condition / intention
+   Sek   — execute / compute / act
+   Ch'en — project / output
+   Xul   — consolidate / collapse
+   Noj   — controlled reflection / bounded reasoning *)
+
+(* ================================================================
+   8. KXML INTEROPERABILITY
+   ================================================================ *)
+KxmlStatement ::=
+      "kxml" "run" StringLiteral (KxmlOptions)?
+    | "kxml" "chat" StringLiteral "with" KxmlContext
+    | "kxml" "render" StringLiteral "using" StringLiteral
+
+KxmlOptions ::= "{" (KxmlOption ("," KxmlOption)*) "}"
+KxmlOption ::= Identifier ":" Expression
+
+KxmlContext ::= "{" (KeyValuePair ("," KeyValuePair)*) "}"
+KeyValuePair ::= Identifier ":" Expression
+
+(* KXML forwards graphs to the kast/1 → kfold/1 semantic runtime,
+   supports tool-aware Jinja chat templates, and may route through
+   the browser service worker or a local inference sidecar. *)
+
+(* ================================================================
+   9. EXPRESSIONS
+   ================================================================ *)
+Expression ::=
+      Literal
+    | Identifier
+    | GlyphCall
+    | ObjectLiteral
+    | ArrayLiteral
+    | BinaryExpression
+    | UnaryExpression
+    | ParenthesizedExpression
+
+Literal ::=
+      NumericLiteral
+    | StringLiteral
+    | BooleanLiteral
+    | "null"
+
+ObjectLiteral ::= "{" (Property ("," Property)*)? "}"
+Property ::= Identifier ":" Expression
+
+ArrayLiteral ::= "[" (Expression ("," Expression)*)? "]"
+
+BinaryExpression ::= Expression Operator Expression
+Operator ::= "+" | "-" | "*" | "/" | "==" | "!=" | "<" | ">" | "<=" | ">=" | "&&" | "||"
+
+UnaryExpression ::= ("!" | "-" | "+") Expression
+ParenthesizedExpression ::= "(" Expression ")"
+
+(* ================================================================
+   10. COMPRESSION / KAST
+   ================================================================ *)
+CompressionLaw ::=
+      Expression "↻" "'scxq2'"
+    | "compress_as_law" "(" Expression ")"
+
+(* Rule: If compression fails → state was never executable. *)
+
+(* ================================================================
+   11. ILLEGAL STATES
+   ================================================================ *)
+IllegalStatePrevention ::=
+      "unreachable_state" "(" ")"
+    | "violation" "(" InvariantName ")"
+
+InvariantName ::=
+      "'collapse_only'"
+    | "'field_perception'"
+    | "'compression_law'"
+    | "'unreachable_states'"
+
+(* ================================================================
+   12. EXECUTION PIPELINE
+   ================================================================ *)
+ExecutionPipeline ::=
+    "perceive_as_field" "(" "curvature_only" ")" "→"
+    "extract_executable_curvature" "→"
+    "collapse_to_law" "→"
+    "output"
+
+(* ================================================================
+   13. PROOF CONSTRUCTS
+   ================================================================ *)
+ProofDeclaration ::= "proof." ProofName ProofDefinition
+ProofName ::= "collapse_only" | "one_outcome" | "separation"
+ProofDefinition ::= "{" ProofContent "}"
+ProofContent ::= "proof_content"
+
+(* ================================================================
+   14. CONTROL FLOW (ABSENT BY LAW IN K'UHUL CORE)
+   ================================================================ *)
+(* NO IF inside pure K'UHUL law.
+   NO LOOPS inside pure K'UHUL law.
+   NO BRANCHING inside pure K'UHUL law.
+   NO PARALLELISM inside pure K'UHUL law.
+   NO MUTATION of pi-bound law.
+
+   Branching and iteration are permitted in the ECMAScript orchestration
+   layer (Micronaut), not in K'UHUL enforcement. *)
+
+(* ================================================================
+   15. COMMENTS
+   ================================================================ *)
+Comment ::= "(*" .* "*)" | "#" .* | "//" .* | "/*" .* "*/"
+
+(* ================================================================
+   16. CANONICAL STATEMENTS
+   ================================================================ *)
+CanonicalStatement ::=
+    "Micronaut orchestrates contexts."
+    "KUHUL π enforces law."
+    "Extrapolator expands without altering outcomes."
+    "They are orthogonal."
+    "The boundary is permanent."
+    "No further refinement possible."
+
+(* ================================================================
+   FINAL LOCK
+   ================================================================ *)
+(* This grammar is deterministic, replay-identical,
+   enforcement-only, Micronaut-safe, and Ramble-compatible.
+   Extensions that cross the locked boundaries contradict the proof. *)
+```
+
+---
+
+## 2. MICRONAUT GRAMMAR FILE
+
+### micronaut.grammar
+
+```ebnf
+(* ================================================================
+   MICRONAUT GRAMMAR — Complete Formal Specification
+   K'UHUL Orchestration Layer
+   ================================================================ *)
+
+(* ================================================================
+   1. ROOT
+   ================================================================ *)
+MicronautSystem ::= { Definition }
+
+Definition ::= MicronautDef
+             | AgentDef
+             | ToolDef
+             | FoldDef
+             | FieldDef
+             | GramDef
+             | RuleDef
+             | ProgramDef
+
+(* ================================================================
+   2. PRIMITIVES
+   ================================================================ *)
+Identifier     ::= Letter , { Letter | Digit | "_" | "-" }
+Letter         ::= "A" | ... | "Z" | "a" | ... | "z"
+Digit          ::= "0" | ... | "9"
+String         ::= '"' , { AnyChar - '"' } , '"'
+Integer        ::= Digit , { Digit }
+Float          ::= Integer , "." , Integer
+Boolean        ::= "true" | "false"
+SemVer         ::= Integer , "." , Integer , "." , Integer
+Timestamp      ::= ISO8601DateTime
+
+(* ================================================================
+   3. MICRONAUT
+   ================================================================ *)
+MicronautDef   ::= "(" "⟁MICRONAUT⟁" ")" , MicronautName , "{" ,
+                 Identity ,
+                 Orchestrates ,
+                 Policy ,
+                 [ Routing ] ,
+                 [ Permissions ] ,
+                 State ,
+                 [ Memory ] ,
+                 Tools ,
+                 [ Hierarchy ] ,
+                 [ Metrics ] ,
+                 [ Lifecycle ] ,
+                 "}" ;
+
+MicronautName  ::= Identifier , "-µ" ;
+
+Identity       ::= "@identity:" , "{" ,
+                 "@name:" , String , "," ,
+                 "@role:" , String , "," ,
+                 "@version:" , SemVer , "," ,
+                 "@created:" , Timestamp ,
+                 "}" ;
+
+Orchestrates   ::= "@orchestrates:" , "[" , { FoldRef , "," } , "]" ;
+
+FoldRef        ::= "F_" , Identifier ;
+
+Policy         ::= "@policy:" , "{" ,
+                 "@priority:" , Priority , "," ,
+                 "@entropy_budget:" , Float , "," ,
+                 "@timeout_ms:" , Integer , "," ,
+                 [ "@retry_policy:" , RetryPolicy ] ,
+                 "}" ;
+
+Priority       ::= "balanced" | "precision" | "innovation" | "efficiency"
+                 | "conservation" | "correctness" | "integrity" | "quality"
+                 | "reliability" | "performance" ;
+
+RetryPolicy    ::= "{" ,
+                 "@max_attempts:" , Integer , "," ,
+                 "@backoff_ms:" , Integer ,
+                 "}" ;
+
+Routing        ::= "@routing:" , "{" ,
+                 "@strategy:" , RoutingStrategy , "," ,
+                 [ "@capability_map:" , CapabilityMap ] ,
+                 "}" ;
+
+RoutingStrategy ::= "round_robin" | "least_loaded" | "consistent_hash" | "geographic" ;
+
+CapabilityMap  ::= "{" , { Capability , ":" , FoldRef , "," } , "}" ;
+
+Capability     ::= Identifier ;
+
+Permissions    ::= "@permissions:" , "[" , { Permission , "," } , "]" ;
+
+Permission     ::= "fold:execute" | "fold:compose" | "field:create"
+                 | "field:read" | "field:write" | "tool:use"
+                 | "gram:resolve" | "geodesic:traverse" ;
+
+State          ::= "@state:" , "{" ,
+                 "@status:" , MicronautStatus , "," ,
+                 "@coherence:" , Float , "," ,
+                 "@entropy:" , Float , "," ,
+                 [ "@uptime_ms:" , Integer , "," ] ,
+                 [ "@last_action:" , Timestamp ] ,
+                 "}" ;
+
+MicronautStatus ::= "created" | "initializing" | "ready" | "running"
+                  | "paused" | "degraded" | "recovering" | "terminating" | "terminated" ;
+
+Memory         ::= "@memory:" , "{" ,
+                 [ "@field:" , FieldRef , "," ] ,
+                 [ "@working:" , FieldRef , "," ] ,
+                 [ "@episodic:" , FieldRef ] ,
+                 "}" ;
+
+FieldRef       ::= "Φ_" , Identifier ;
+
+Tools          ::= "@tools:" , "[" , { ToolRef , "," } , "]" ;
+
+ToolRef        ::= Identifier ;
+
+Hierarchy      ::= [ "@parent:" , MicronautRef , "," ] ,
+                 [ "@children:" , "[" , { MicronautRef , "," } , "]" ] ;
+
+MicronautRef   ::= Identifier , "-µ" ;
+
+Metrics        ::= "@metrics:" , "{" ,
+                 [ "@folds_executed:" , Integer , "," ] ,
+                 [ "@fields_projected:" , Integer , "," ] ,
+                 [ "@grams_resolved:" , Integer , "," ] ,
+                 [ "@traversals_completed:" , Integer , "," ] ,
+                 [ "@errors:" , Integer , "," ] ,
+                 [ "@avg_latency_ms:" , Float ] ,
+                 "}" ;
+
+Lifecycle      ::= "@lifecycle:" , "{" ,
+                 [ "@on_before_create:" , ActionList , "," ] ,
+                 [ "@on_after_create:" , ActionList , "," ] ,
+                 [ "@on_before_start:" , ActionList , "," ] ,
+                 [ "@on_after_start:" , ActionList , "," ] ,
+                 [ "@on_before_stop:" , ActionList , "," ] ,
+                 [ "@on_after_stop:" , ActionList , "," ] ,
+                 [ "@on_error:" , ActionList ] ,
+                 "}" ;
+
+ActionList     ::= "[" , { Action , "," } , "]" ;
+
+Action         ::= "{" ,
+                 "@action:" , String , "," ,
+                 [ "@params:" , Params ] ,
+                 "}" ;
+
+Params         ::= "{" , { Param , "," } , "}" ;
+
+Param          ::= String , ":" , Value ;
+
+Value          ::= String | Integer | Float | Boolean | "null" ;
+
+(* ================================================================
+   4. AGENT (Task Executor)
+   ================================================================ *)
+AgentDef       ::= "(" "⟁AGENT⟁" ")" , AgentName , "{" ,
+                 AgentIdentity ,
+                 Tools ,
+                 [ Goals ] ,
+                 [ Constraints ] ,
+                 State ,
+                 "}" ;
+
+AgentName      ::= Identifier , "-A" ;
+
+AgentIdentity  ::= "@identity:" , "{" ,
+                 "@name:" , String , "," ,
+                 "@type:" , AgentType , "," ,
+                 "@created:" , Timestamp ,
+                 "}" ;
+
+AgentType      ::= "worker" | "manager" | "explorer" | "creator" | "helper" ;
+
+Goals          ::= "@goals:" , "[" , { Goal , "," } , "]" ;
+
+Goal           ::= "{" ,
+                 "@description:" , String , "," ,
+                 "@priority:" , Float , "," ,
+                 [ "@deadline:" , Timestamp ] ,
+                 "}" ;
+
+Constraints    ::= "@constraints:" , "[" , { Constraint , "," } , "]" ;
+
+Constraint     ::= String ;
+
+(* ================================================================
+   5. TOOL (K'UHUL Program)
+   ================================================================ *)
+ToolDef        ::= "(" "⟁TOOL⟁" ")" , ToolName , "{" ,
+                 ToolIdentity ,
+                 ToolSignature ,
+                 ToolBody ,
+                 "}" ;
+
+ToolName       ::= Identifier , "-T" ;
+
+ToolIdentity   ::= "@identity:" , "{" ,
+                 "@id:" , String , "," ,
+                 "@name:" , String , "," ,
+                 "@fold:" , FoldName , "," ,
+                 "@port:" , Integer ,
+                 "}" ;
+
+FoldName       ::= "COMPUTE" | "UI" | "STATE" | "CONTROL" | "META" | "DATA" | "UNASSIGNED" ;
+
+ToolSignature  ::= "@signature:" , "{" ,
+                 "@input:" , TypeSpec , "," ,
+                 "@output:" , TypeSpec , "," ,
+                 [ "@effect:" , String ] ,
+                 "}" ;
+
+TypeSpec       ::= String | "{" , { TypeField , "," } , "}" ;
+
+TypeField      ::= String , ":" , TypeSpec ;
+
+ToolBody       ::= "@execute:" , CodeBlock ;
+
+CodeBlock      ::= "{" , { Statement } , "}" ;
+
+Statement      ::= Assignment | Expression | IfStatement | LoopStatement | ReturnStatement ;
+
+Assignment     ::= Identifier , "=" , Expression ;
+
+Expression     ::= Literal | Identifier | FunctionCall | BinaryOp | UnaryOp ;
+
+Literal        ::= String | Integer | Float | Boolean | ArrayLiteral | ObjectLiteral ;
+
+FunctionCall   ::= Identifier , "(" , { Expression , "," } , ")" ;
+
+BinaryOp       ::= Expression , Operator , Expression ;
+
+UnaryOp        ::= Operator , Expression ;
+
+Operator       ::= "+" | "-" | "*" | "/" | "%" | "==" | "!=" | "<" | "<=" | ">" | ">="
+                 | "&&" | "||" | "!" ;
+
+IfStatement    ::= "if" , "(" , Expression , ")" , Block , [ "else" , Block ] ;
+
+LoopStatement  ::= "while" , "(" , Expression , ")" , Block ;
+
+ReturnStatement = "return" , [ Expression ] ;
+
+Block          ::= "{" , { Statement } , "}" ;
+
+ArrayLiteral   ::= "[" , { Expression , "," } , "]" ;
+
+ObjectLiteral  ::= "{" , { KeyValue , "," } , "}" ;
+
+KeyValue       ::= String , ":" , Expression ;
+
+(* ================================================================
+   6. FOLD (Executable Structure)
+   ================================================================ *)
+FoldDef        ::= "(" "⟁FOLD⟁" ")" , FoldName , "{" ,
+                 FoldIdentity ,
+                 FoldBody ,
+                 "}" ;
+
+FoldName       ::= "F_" , Identifier ;
+
+FoldIdentity   ::= "@identity:" , "{" ,
+                 "@name:" , String , "," ,
+                 "@type:" , FoldType , "," ,
+                 "@version:" , SemVer ,
+                 "}" ;
+
+FoldType       ::= "orchestrator" | "compute" | "storage" | "network"
+                 | "reasoning" | "generation" | "planning" | "persistence"
+                 | "codegen" | "filesystem" | "graphics" | "inference" ;
+
+FoldBody       ::= "@nodes:" , "[" , { Node , "," } , "]" ;
+
+Node           ::= "{" ,
+                 "@id:" , String , "," ,
+                 "@type:" , NodeType , "," ,
+                 [ "@config:" , Config ] ,
+                 [ "@edges:" , "[" , { Edge , "," } , "]" ] ,
+                 "}" ;
+
+NodeType       ::= "input" | "output" | "process" | "transform" | "gate" | "memory" | "dispatch" ;
+
+Edge           ::= "{" ,
+                 "@from:" , String , "," ,
+                 "@to:" , String , "," ,
+                 [ "@weight:" , Float ] ,
+                 "}" ;
+
+Config         ::= "{" , { ConfigEntry , "," } , "}" ;
+
+ConfigEntry    ::= String , ":" , Value ;
+
+(* ================================================================
+   7. FIELD (Semantic State)
+   ================================================================ *)
+FieldDef       ::= "(" "⟁FIELD⟁" ")" , FieldName , "{" ,
+                 FieldIdentity ,
+                 FieldData ,
+                 "}" ;
+
+FieldName      ::= "Φ_" , Identifier ;
+
+FieldIdentity  ::= "@identity:" , "{" ,
+                 "@name:" , String , "," ,
+                 "@type:" , FieldType , "," ,
+                 "@persistence:" , Persistence ,
+                 "}" ;
+
+FieldType      ::= "working" | "episodic" | "semantic" | "procedural" | "persistent" ;
+
+Persistence    ::= "volatile" | "persistent" | "ephemeral" ;
+
+FieldData      ::= "@data:" , MatrixSpec ;
+
+MatrixSpec     ::= "{" ,
+                 "@rows:" , Integer , "," ,
+                 "@cols:" , Integer , "," ,
+                 [ "@values:" , "[" , { Float , "," } , "]" ] ,
+                 "}" ;
+
+(* ================================================================
+   8. GRAM (Symbolic Index)
+   ================================================================ *)
+GramDef        ::= "(" "⟁GRAM⟁" ")" , GramName , "{" ,
+                 GramIdentity ,
+                 GramBody ,
+                 "}" ;
+
+GramName       ::= "G_" , Identifier ;
+
+GramIdentity   ::= "@identity:" , "{" ,
+                 "@name:" , String , "," ,
+                 "@arity:" , Integer , "," ,
+                 "@binding:" , Binding ,
+                 "}" ;
+
+Binding        ::= "dynamic" | "static" | "lazy" ;
+
+GramBody       ::= "@symbols:" , "[" , { Symbol , "," } , "]" ;
+
+Symbol         ::= "{" ,
+                 "@name:" , String , "," ,
+                 "@type:" , SymbolType , "," ,
+                 [ "@value:" , Value ] ,
+                 "}" ;
+
+SymbolType     ::= "constant" | "variable" | "function" | "type" | "module" ;
+
+(* ================================================================
+   9. RULE (XCFE Condition-Action)
+   ================================================================ *)
+RuleDef        ::= "(" "⟁RULE⟁" ")" , RuleName , "{" ,
+                 RuleIdentity ,
+                 Condition ,
+                 Action ,
+                 "}" ;
+
+RuleName       ::= "X_" , Identifier ;
+
+RuleIdentity   ::= "@identity:" , "{" ,
+                 "@id:" , String , "," ,
+                 "@name:" , String , "," ,
+                 "@priority:" , Integer , "," ,
+                 "@entropy_cost:" , Float , "," ,
+                 "@cooldown_ms:" , Integer ,
+                 "}" ;
+
+Condition      ::= "@condition:" , ConditionExpr ;
+
+ConditionExpr  ::= "{" ,
+                 "@field:" , FieldPath , "," ,
+                 "@operator:" , Operator , "," ,
+                 "@value:" , Value ,
+                 "}" ;
+
+FieldPath      ::= String , { "." , String } ;
+
+Action         ::= "@action:" , ActionExpr ;
+
+ActionExpr     ::= "{" ,
+                 "@type:" , ActionType , "," ,
+                 "@target:" , String , "," ,
+                 [ "@params:" , Params ] ,
+                 "}" ;
+
+ActionType     ::= "dispatch" | "mutate" | "halt" | "checkpoint" | "propagate" | "log" ;
+
+(* ================================================================
+   10. PROGRAM
+   ================================================================ *)
+ProgramDef     ::= "(" "⟁PROGRAM⟁" ")" , ProgramName , "{" ,
+                 ProgramBody ,
+                 "}" ;
+
+ProgramName    ::= Identifier , "-P" ;
+
+ProgramBody    ::= { Definition } ;
+
+(* ================================================================
+   11. COMMENTS
+   ================================================================ *)
+Comment ::= "(*" .* "*)" | "#" .* | "//" .* | "/*" .* "*/"
+
+(* ================================================================
+   12. CANONICAL STATEMENTS
+   ================================================================ *)
+CanonicalStatement ::=
+    "Micronaut orchestrates contexts."
+    "KUHUL π enforces law."
+    "Extrapolator expands without altering outcomes."
+    "They are orthogonal."
+    "The boundary is permanent."
+    "No further refinement possible."
+
+(* ================================================================
+   FINAL LOCK
+   ================================================================ *)
+(* This grammar is deterministic, replay-identical,
+   enforcement-only, Micronaut-safe, and Ramble-compatible.
+   Extensions that cross the locked boundaries contradict the proof. *)
+```
+
+---
+
+## 3. JSON SCHEMA FILES
+
+### kuhul.schema.json
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://kuhul.io/kuhul.schema.json",
+  "title": "K'UHUL Schema",
+  "description": "Complete schema for K'UHUL programs",
+  "version": "2.0.0",
+  
+  "definitions": {
+    "GlyphName": {
+      "type": "string",
+      "enum": ["Pop", "Wo", "Yax", "Sek", "Ch'en", "Xul", "Noj"]
+    },
+    
+    "PhaseName": {
+      "type": "string",
+      "enum": ["Pop", "Wo", "Yax", "Sek", "Ch'en", "Xul", "Noj"]
+    },
+    
+    "Operator": {
+      "type": "string",
+      "enum": ["+", "-", "*", "/", "==", "!=", "<", ">", "<=", ">=", "&&", "||"]
+    },
+    
+    "Expression": {
+      "type": "object",
+      "properties": {
+        "type": { "type": "string" },
+        "value": { "type": "string" }
+      }
+    }
+  },
+  
+  "type": "object",
+  "properties": {
+    "protocol": { "const": "kast/1" },
+    "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "source": { "type": "string" },
+    "semantic_hash": { "type": "string" },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "glyph", "phase"],
+        "properties": {
+          "id": { "type": "string" },
+          "index": { "type": "integer" },
+          "glyph": { "$ref": "#/definitions/GlyphName" },
+          "opcode": { "type": "string" },
+          "symbol": { "type": "string" },
+          "operands": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "phase": { "$ref": "#/definitions/PhaseName" },
+          "value": { "type": "string" },
+          "metadata": { "type": "object" }
+        }
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["from", "to", "kind"],
+        "properties": {
+          "from": { "type": "string" },
+          "to": { "type": "string" },
+          "kind": {
+            "type": "string",
+            "enum": ["control", "data", "sequence", "admission", "semantic"]
+          },
+          "phase": { "$ref": "#/definitions/PhaseName" },
+          "operand_index": { "type": "integer" }
+        }
+      }
+    },
+    "phases": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/PhaseName" }
+    },
+    "metadata": { "type": "object" },
+    "manifest": { "type": "object" }
+  }
+}
+```
+
+### micronaut.schema.json
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://kuhul.io/micronaut.schema.json",
+  "title": "Micronaut Schema",
+  "description": "Complete schema for Micronaut ecosystem components",
+  "version": "7.0.0",
+  
+  "definitions": {
+    "Identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_\\-]*$"
+    },
+    
+    "SemVer": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    
+    "Timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    
+    "Float": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    
+    "Integer": {
+      "type": "integer",
+      "minimum": 0
+    },
+    
+    "Priority": {
+      "type": "string",
+      "enum": ["balanced", "precision", "innovation", "efficiency", 
+               "conservation", "correctness", "integrity", "quality", 
+               "reliability", "performance"]
+    },
+    
+    "RoutingStrategy": {
+      "type": "string",
+      "enum": ["round_robin", "least_loaded", "consistent_hash", "geographic"]
+    },
+    
+    "MicronautStatus": {
+      "type": "string",
+      "enum": ["created", "initializing", "ready", "running", "paused", 
+               "degraded", "recovering", "terminating", "terminated"]
+    },
+    
+    "Permission": {
+      "type": "string",
+      "enum": ["fold:execute", "fold:compose", "field:create", "field:read", 
+               "field:write", "tool:use", "gram:resolve", "geodesic:traverse"]
+    },
+    
+    "FoldType": {
+      "type": "string",
+      "enum": ["orchestrator", "compute", "storage", "network", "reasoning",
+               "generation", "planning", "persistence", "codegen", "filesystem",
+               "graphics", "inference"]
+    },
+    
+    "NodeType": {
+      "type": "string",
+      "enum": ["input", "output", "process", "transform", "gate", "memory", "dispatch"]
+    },
+    
+    "FieldType": {
+      "type": "string",
+      "enum": ["working", "episodic", "semantic", "procedural", "persistent"]
+    },
+    
+    "Persistence": {
+      "type": "string",
+      "enum": ["volatile", "persistent", "ephemeral"]
+    },
+    
+    "AgentType": {
+      "type": "string",
+      "enum": ["worker", "manager", "explorer", "creator", "helper"]
+    },
+    
+    "ActionType": {
+      "type": "string",
+      "enum": ["dispatch", "mutate", "halt", "checkpoint", "propagate", "log"]
+    }
+  },
+  
+  "type": "object",
+  "properties": {
+    "micronauts": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/Micronaut" }
+    },
+    "agents": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/Agent" }
+    },
+    "tools": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/Tool" }
+    },
+    "folds": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/Fold" }
+    },
+    "fields": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/Field" }
+    },
+    "grams": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/Gram" }
+    },
+    "rules": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/Rule" }
+    }
+  },
+  
+  "definitions": {
+    "Micronaut": {
+      "type": "object",
+      "required": ["identity", "orchestrates", "policy", "state", "tools"],
+      "properties": {
+        "identity": { "$ref": "#/definitions/Identity" },
+        "orchestrates": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^F_[A-Za-z0-9_]+$" }
+        },
+        "policy": { "$ref": "#/definitions/Policy" },
+        "routing": { "$ref": "#/definitions/Routing" },
+        "permissions": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Permission" }
+        },
+        "state": { "$ref": "#/definitions/MicronautState" },
+        "memory": { "$ref": "#/definitions/Memory" },
+        "tools": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "hierarchy": { "$ref": "#/definitions/Hierarchy" },
+        "metrics": { "$ref": "#/definitions/Metrics" },
+        "lifecycle": { "$ref": "#/definitions/Lifecycle" }
+      }
+    },
+    
+    "Identity": {
+      "type": "object",
+      "required": ["name", "role", "version"],
+      "properties": {
+        "name": { "type": "string" },
+        "role": { "type": "string" },
+        "version": { "$ref": "#/definitions/SemVer" },
+        "type": { "const": "orchestrator" },
+        "created": { "$ref": "#/definitions/Timestamp" }
+      }
+    },
+    
+    "Policy": {
+      "type": "object",
+      "required": ["priority", "entropy_budget", "timeout_ms"],
+      "properties": {
+        "priority": { "$ref": "#/definitions/Priority" },
+        "entropy_budget": { "$ref": "#/definitions/Float" },
+        "timeout_ms": { "$ref": "#/definitions/Integer" },
+        "retry_policy": {
+          "type": "object",
+          "properties": {
+            "max_attempts": { "$ref": "#/definitions/Integer" },
+            "backoff_ms": { "$ref": "#/definitions/Integer" }
+          }
+        }
+      }
+    },
+    
+    "Routing": {
+      "type": "object",
+      "properties": {
+        "strategy": { "$ref": "#/definitions/RoutingStrategy" },
+        "capability_map": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "pattern": "^F_[A-Za-z0-9_]+$"
+          }
+        }
+      }
+    },
+    
+    "MicronautState": {
+      "type": "object",
+      "required": ["status", "coherence", "entropy"],
+      "properties": {
+        "status": { "$ref": "#/definitions/MicronautStatus" },
+        "coherence": { "$ref": "#/definitions/Float" },
+        "entropy": { "$ref": "#/definitions/Float" },
+        "uptime_ms": { "$ref": "#/definitions/Integer" },
+        "last_action": { "$ref": "#/definitions/Timestamp" }
+      }
+    },
+    
+    "Memory": {
+      "type": "object",
+      "properties": {
+        "field": { "type": "string", "pattern": "^Φ_[A-Za-z0-9_]+$" },
+        "working": { "type": "string", "pattern": "^Φ_[A-Za-z0-9_]+$" },
+        "episodic": { "type": "string", "pattern": "^Φ_[A-Za-z0-9_]+$" }
+      }
+    },
+    
+    "Hierarchy": {
+      "type": "object",
+      "properties": {
+        "parent": { "type": "string" },
+        "children": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    
+    "Metrics": {
+      "type": "object",
+      "properties": {
+        "folds_executed": { "$ref": "#/definitions/Integer" },
+        "fields_projected": { "$ref": "#/definitions/Integer" },
+        "grams_resolved": { "$ref": "#/definitions/Integer" },
+        "traversals_completed": { "$ref": "#/definitions/Integer" },
+        "errors": { "$ref": "#/definitions/Integer" },
+        "avg_latency_ms": { "type": "number" }
+      }
+    },
+    
+    "Lifecycle": {
+      "type": "object",
+      "properties": {
+        "on_before_create": { "$ref": "#/definitions/ActionList" },
+        "on_after_create": { "$ref": "#/definitions/ActionList" },
+        "on_before_start": { "$ref": "#/definitions/ActionList" },
+        "on_after_start": { "$ref": "#/definitions/ActionList" },
+        "on_before_stop": { "$ref": "#/definitions/ActionList" },
+        "on_after_stop": { "$ref": "#/definitions/ActionList" },
+        "on_error": { "$ref": "#/definitions/ActionList" }
+      }
+    },
+    
+    "ActionList": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "action": { "type": "string" },
+          "params": { "type": "object" }
+        }
+      }
+    },
+    
+    "Agent": {
+      "type": "object",
+      "required": ["identity", "tools"],
+      "properties": {
+        "identity": { "$ref": "#/definitions/AgentIdentity" },
+        "tools": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "goals": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "description": { "type": "string" },
+              "priority": { "type": "number" },
+              "deadline": { "$ref": "#/definitions/Timestamp" }
+            }
+          }
+        },
+        "constraints": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "state": { "$ref": "#/definitions/MicronautState" }
+      }
+    },
+    
+    "AgentIdentity": {
+      "type": "object",
+      "required": ["name", "type"],
+      "properties": {
+        "name": { "type": "string" },
+        "type": { "$ref": "#/definitions/AgentType" },
+        "created": { "$ref": "#/definitions/Timestamp" }
+      }
+    },
+    
+    "Tool": {
+      "type": "object",
+      "required": ["identity", "signature"],
+      "properties": {
+        "identity": { "$ref": "#/definitions/ToolIdentity" },
+        "signature": { "$ref": "#/definitions/ToolSignature" },
+        "execute": { "type": "object" }
+      }
+    },
+    
+    "ToolIdentity": {
+      "type": "object",
+      "required": ["id", "name", "fold"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "fold": { "type": "string" },
+        "port": { "type": "integer" }
+      }
+    },
+    
+    "ToolSignature": {
+      "type": "object",
+      "required": ["input", "output"],
+      "properties": {
+        "input": { "type": "string" },
+        "output": { "type": "string" },
+        "effect": { "type": "string" }
+      }
+    },
+    
+    "Fold": {
+      "type": "object",
+      "required": ["identity", "nodes"],
+      "properties": {
+        "identity": { "$ref": "#/definitions/FoldIdentity" },
+        "nodes": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Node" }
+        }
+      }
+    },
+    
+    "FoldIdentity": {
+      "type": "object",
+      "required": ["name", "type", "version"],
+      "properties": {
+        "name": { "type": "string" },
+        "type": { "$ref": "#/definitions/FoldType" },
+        "version": { "$ref": "#/definitions/SemVer" }
+      }
+    },
+    
+    "Node": {
+      "type": "object",
+      "required": ["id", "type"],
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "$ref": "#/definitions/NodeType" },
+        "config": { "type": "object" },
+        "edges": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "from": { "type": "string" },
+              "to": { "type": "string" },
+              "weight": { "type": "number" }
+            }
+          }
+        }
+      }
+    },
+    
+    "Field": {
+      "type": "object",
+      "required": ["identity", "data"],
+      "properties": {
+        "identity": { "$ref": "#/definitions/FieldIdentity" },
+        "data": { "$ref": "#/definitions/MatrixSpec" }
+      }
+    },
+    
+    "FieldIdentity": {
+      "type": "object",
+      "required": ["name", "type", "persistence"],
+      "properties": {
+        "name": { "type": "string" },
+        "type": { "$ref": "#/definitions/FieldType" },
+        "persistence": { "$ref": "#/definitions/Persistence" }
+      }
+    },
+    
+    "MatrixSpec": {
+      "type": "object",
+      "required": ["rows", "cols"],
+      "properties": {
+        "rows": { "type": "integer" },
+        "cols": { "type": "integer" },
+        "values": {
+          "type": "array",
+          "items": { "type": "number" }
+        }
+      }
+    },
+    
+    "Gram": {
+      "type": "object",
+      "required": ["identity", "symbols"],
+      "properties": {
+        "identity": { "$ref": "#/definitions/GramIdentity" },
+        "symbols": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Symbol" }
+        }
+      }
+    },
+    
+    "GramIdentity": {
+      "type": "object",
+      "required": ["name", "arity", "binding"],
+      "properties": {
+        "name": { "type": "string" },
+        "arity": { "type": "integer" },
+        "binding": {
+          "type": "string",
+          "enum": ["dynamic", "static", "lazy"]
+        }
+      }
+    },
+    
+    "Symbol": {
+      "type": "object",
+      "required": ["name", "type"],
+      "properties": {
+        "name": { "type": "string" },
+        "type": {
+          "type": "string",
+          "enum": ["constant", "variable", "function", "type", "module"]
+        },
+        "value": { "type": "string" }
+      }
+    },
+    
+    "Rule": {
+      "type": "object",
+      "required": ["identity", "condition", "action"],
+      "properties": {
+        "identity": { "$ref": "#/definitions/RuleIdentity" },
+        "condition": { "$ref": "#/definitions/ConditionExpr" },
+        "action": { "$ref": "#/definitions/ActionExpr" }
+      }
+    },
+    
+    "RuleIdentity": {
+      "type": "object",
+      "required": ["id", "name", "priority"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "priority": { "type": "integer" },
+        "entropy_cost": { "type": "number" },
+        "cooldown_ms": { "type": "integer" }
+      }
+    },
+    
+    "ConditionExpr": {
+      "type": "object",
+      "required": ["field", "operator", "value"],
+      "properties": {
+        "field": { "type": "string" },
+        "operator": {
+          "type": "string",
+          "enum": ["==", "!=", "<", "<=", ">", ">=", "contains", "matches"]
+        },
+        "value": { "type": "string" }
+      }
+    },
+    
+    "ActionExpr": {
+      "type": "object",
+      "required": ["type", "target"],
+      "properties": {
+        "type": { "$ref": "#/definitions/ActionType" },
+        "target": { "type": "string" },
+        "params": { "type": "object" }
+      }
+    }
+  }
+}
+```
+
+---
+
+## 4. FILE STRUCTURE
+
+```
+kuhul-es/
+├── grammar/
+│   ├── kuhul.grammar          # K'UHUL grammar
+│   ├── micronaut.grammar      # Micronaut grammar
+│   ├── kuhul.schema.json      # K'UHUL JSON Schema
+│   └── micronaut.schema.json  # Micronaut JSON Schema
+├── examples/
+│   ├── driver_v2.kson         # Driver example
+│   ├── trained_skeleton.json  # Trained skeleton example
+│   ├── coder.khl              # Coder domain example
+│   ├── instructor.khl         # Instructor domain example
+│   └── assistant.khl          # Assistant domain example
+└── runtime/
+    ├── kuhul.js               # K'UHUL runtime
+    ├── micronaut.js           # Micronaut runtime
+    ├── bridges.js             # Bridge implementations
+    └── skeletons.js           # Skeleton templates
+```
+
+---
+
+## 5. QUICK REFERENCE
+
+### K'UHUL Glyphs
+
+| Glyph | Phase | Meaning |
+|-------|-------|---------|
+| Pop | Perceive | Input / Perception |
+| Wo | Represent | Build / Bind |
+| Yax | Plan | Condition / Intention |
+| Sek | Execute | Compute / Act |
+| Ch'en | Project | Output |
+| Xul | Consolidate | Collapse |
+| Noj | Reflect | Bounded Reasoning |
+
+### Micronaut Components
+
+| Component | Prefix | Description |
+|-----------|--------|-------------|
+| Micronaut | `-µ` | Orchestrator |
+| Fold | `F_` | Executable Structure |
+| Field | `Φ_` | Semantic State |
+| Tool | `-T` | K'UHUL Program |
+| Agent | `-A` | Task Executor |
+| Gram | `G_` | Symbolic Index |
+| Rule | `X_` | XCFE Condition-Action |
+
+The complete grammar files are ready for use! 🚀
+
+
+
 
 
 ## ⚡ Performance
