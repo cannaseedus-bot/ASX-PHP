@@ -3410,11 +3410,11 @@ cd PHPServer.ps1
 
 A production-ready PHP implementation of geometric algebra, computational geometry, and spatial reasoning — designed to integrate seamlessly with **K'UHUL π** phase enforcement and **Micronaut µ** orchestration.
 
-[![Version](https://img.shields.io/badge/version-3.0.0-blue.svg)](https://github.com/your-repo/geometry.php)
+[![Version](https://img.shields.io/badge/version-3.0.0-blue.svg)](https://github.com/cannaseedus-bot/ASX-PHP/geometry.php)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![PHP](https://img.shields.io/badge/php-8.0%2B-purple.svg)](https://php.net)
-[![K'UHUL](https://img.shields.io/badge/K'UHUL-π-magenta.svg)](https://kuhul.io)
-[![Micronaut](https://img.shields.io/badge/Micronaut-µ-cyan.svg)](https://kuhul.io)
+[![K'UHUL](https://img.shields.io/badge/K'UHUL-π-magenta.svg)](https://kuhul.dev)
+[![Micronaut](https://img.shields.io/badge/Micronaut-µ-cyan.svg)](https://kuhul.dev)
 
 ## 📋 Table of Contents
 
@@ -3539,12 +3539,9 @@ composer require kuhul/geometry
 }
 ```
 
-### Option 3: Git Clone
 
-```bash
-git clone https://github.com/your-repo/geometry.php.git
-cd geometry.php
-```
+
+
 
 ### System Requirements
 
@@ -4096,14 +4093,6 @@ tests/
 
 We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
-### Development Setup
-
-```bash
-git clone https://github.com/your-repo/geometry.php.git
-cd geometry.php
-composer install
-composer test
-```
 
 ### Code Style
 
@@ -4150,9 +4139,9 @@ SOFTWARE.
 
 ## 📞 Support
 
-- **Documentation**: [https://github.com/your-repo/geometry.php](https://github.com/your-repo/geometry.php)
-- **Issues**: [https://github.com/your-repo/geometry.php/issues](https://github.com/your-repo/geometry.php/issues)
-- **Discussions**: [https://github.com/your-repo/geometry.php/discussions](https://github.com/your-repo/geometry.php/discussions)
+- **Documentation**: [https://github.com/cannaseedus-bot/ASX-PHP/geometry.php](https://github.com/cannaseedus-bot/ASX-PHP/geometry.php)
+- **Issues**: [https://github.com/cannaseedus-bot/ASX-PHP/geometry.php/issues](https://github.com/cannaseedus-bot/ASX-PHP/geometry.php/issues)
+- **Discussions**: [https://github.com/cannaseedus-bot/ASX-PHP/geometry.php/discussions](https://github.com/cannaseedus-bot/ASX-PHP/geometry.php/discussions)
 
 ---
 
