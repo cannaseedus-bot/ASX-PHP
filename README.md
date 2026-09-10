@@ -1,4 +1,9 @@
 # ASX-PHP
+[![Version](https://img.shields.io/badge/version-3.0.0-blue.svg)](https://github.com/cannaseedus-bot/ASX-PHP/geometry.php)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![PHP](https://img.shields.io/badge/php-8.0%2B-purple.svg)](https://php.net)
+[![K'UHUL](https://img.shields.io/badge/K'UHUL-π-magenta.svg)](https://kuhul.dev)
+[![Micronaut](https://img.shields.io/badge/Micronaut-µ-cyan.svg)](https://kuhul.dev)
 
 # PS1 PHP Server - Complete PHP Runtime Server
 
@@ -3410,11 +3415,7 @@ cd PHPServer.ps1
 
 A production-ready PHP implementation of geometric algebra, computational geometry, and spatial reasoning — designed to integrate seamlessly with **K'UHUL π** phase enforcement and **Micronaut µ** orchestration.
 
-[![Version](https://img.shields.io/badge/version-3.0.0-blue.svg)](https://github.com/cannaseedus-bot/ASX-PHP/geometry.php)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![PHP](https://img.shields.io/badge/php-8.0%2B-purple.svg)](https://php.net)
-[![K'UHUL](https://img.shields.io/badge/K'UHUL-π-magenta.svg)](https://kuhul.dev)
-[![Micronaut](https://img.shields.io/badge/Micronaut-µ-cyan.svg)](https://kuhul.dev)
+
 
 ## 📋 Table of Contents
 
