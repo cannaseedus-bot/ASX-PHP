@@ -1632,6 +1632,103 @@ Each format serves a different purpose:
 - **PEG**: Good for recursive descent parsers
 - **JSON Schema**: Great for validation and tooling
 
+REST API Examples
+bash
+# Get service info
+curl http://localhost:8080/
+
+# Health check
+curl http://localhost:8080/health
+
+# DNS lookup
+curl "http://localhost:8080/api/v1/dns?domain=google.com&type=A"
+
+# Cache stats
+curl http://localhost:8080/api/v1/cache/stats
+
+# Clear cache
+curl -X DELETE http://localhost:8080/api/v1/cache
+JSON-RPC Examples
+bash
+# System info
+curl -X POST http://localhost:8080/api/rpc \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","method":"system.info","id":1}'
+
+# Echo
+curl -X POST http://localhost:8080/api/rpc \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","method":"system.echo","params":{"message":"Hello"},"id":2}'
+
+# DNS lookup via RPC
+curl -X POST http://localhost:8080/api/rpc \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","method":"dns.resolve","params":{"domain":"example.com"},"id":3}'
+
+# Cache operations
+curl -X POST http://localhost:8080/api/rpc \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","method":"cache.set","params":{"key":"test","value":"Hello World"},"id":4}'
+
+curl -X POST http://localhost:8080/api/rpc \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","method":"cache.get","params":{"key":"test"},"id":5}'
+MCP HTTP Mode Examples
+bash
+# Initialize
+curl -X POST http://localhost:8080/mcp \
+  -H "Content-Type: application/json" \
+  -d '{"type":"initialize"}'
+
+# List tools
+curl -X POST http://localhost:8080/mcp \
+  -H "Content-Type: application/json" \
+  -d '{"type":"tools/list"}'
+
+# Call a tool
+curl -X POST http://localhost:8080/mcp \
+  -H "Content-Type: application/json" \
+  -d '{"type":"tools/call","name":"echo","parameters":{"message":"Hello MCP"}}'
+
+# List resources
+curl -X POST http://localhost:8080/mcp \
+  -H "Content-Type: application/json" \
+  -d '{"type":"resources/list"}'
+
+# Read a resource
+curl -X POST http://localhost:8080/mcp \
+  -H "Content-Type: application/json" \
+  -d '{"type":"resources/read","uri":"info://server"}'
+MCP Stdio Mode
+bash
+# Run MCP in stdio mode
+echo '{"type":"initialize"}' | php cli.php
+echo '{"type":"tools/list"}' | php cli.php
+Summary
+This implementation is:
+
+Complete - All requested features: JSON-RPC, REST API, DNS caching, file caching, MCP
+
+Self-contained - No external dependencies, just pure PHP
+
+Lightweight - ~500 lines total across all files
+
+Production-ready - Includes error handling, logging, CORS support
+
+Extensible - Easy to add new routes, RPC methods, MCP tools/resources
+
+To run it:
+
+Create the directory structure
+
+Copy all files
+
+Create cache/ and logs/ directories
+
+Run php -S localhost:8080 -t public or use Apache with the .htaccess file
+
+
+
 
 ## ⚡ Performance
 
