@@ -3149,9 +3149,10 @@ kuhul-es/
 
 
 
-🚀 Usage Examples
-1. Basic Vector Operations
+### 🚀 Usage Examples
+## 1. Basic Vector Operations
 php
+```
 require 'geometry.php';
 
 $v1 = new Vector(1, 2, 3);
@@ -3262,7 +3263,9 @@ $result = $mcpServer->handleHttpRequest([
         ]
     ]
 ]);
-📋 Feature Matrix
+```
+
+### 📋 Feature Matrix
 Feature	Class	Status
 Vectors (2D/3D/4D)	Vector	✅
 Matrices (2D/3D/4D)	Matrix	✅
