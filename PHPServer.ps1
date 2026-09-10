@@ -25,6 +25,7 @@
 
 [CmdletBinding()]
 param(
+    [ValidateRange(1, 65535)]
     [int]$Port = 8080,
     [string]$DocumentRoot = "./public",
     [string]$CacheDir = "./cache",
@@ -214,7 +215,7 @@ class PHPLexer {
                 return [PHPToken]::new('STRING', $value, $startLine, $startColumn)
             }
             
-            if ($char -eq "\") {
+            if ($char -eq '\') {
                 # Escape character
                 $this.Position++
                 $this.Column++
@@ -224,8 +225,8 @@ class PHPLexer {
                         'n' { $value += "`n" }
                         'r' { $value += "`r" }
                         't' { $value += "`t" }
-                        '\' { $value += "\" }
-                        '$' { $value += "$" }
+                        '\' { $value += '\' }
+                        '$' { $value += '$' }
                         '"' { $value += '"' }
                         "'" { $value += "'" }
                         default { $value += $nextChar }
@@ -262,18 +263,18 @@ class PHPLexer {
         $endLabel = $label
         
         while ($this.Position -lt $this.Source.Length) {
-            $line = $this.ReadLine()
-            if ($line.Trim() -eq $endLabel) {
+            $currentLine = $this.ReadLine()
+            if ($currentLine.Trim() -eq $endLabel) {
                 break
             }
-            $value += $line + "`n"
+            $value += $currentLine + "`n"
         }
         
         return [PHPToken]::new('HEREDOC', $value.TrimEnd(), $startLine, $startColumn)
     }
     
     [string]ReadLine() {
-        $line = ""
+        $currentLine = ""
         while ($this.Position -lt $this.Source.Length) {
             $char = $this.Source[$this.Position]
             if ($char -eq "`n") {
@@ -282,11 +283,11 @@ class PHPLexer {
                 $this.Column = 1
                 break
             }
-            $line += $char
+            $currentLine += $char
             $this.Position++
             $this.Column++
         }
-        return $line
+        return $currentLine
     }
     
     [PHPToken]ScanIdentifier() {
@@ -399,7 +400,7 @@ class PHPLexer {
         $char = $this.Source[$this.Position]
         
         # Multi-character operators
-        $multiCharOperators = @('++', '--', '**', '<<', '>>', '<=>', '??', '&&', '||', '==', '===', '!=', '!==', '<=', '>=', '=>', '->')
+        $multiCharOperators = @('++', '--', '**', '<<', '>>', '<=>', '??', '&&', '||', '==', '===', '!=', '!==', '<=', '>=', '=>', '->', '?->')
         
         foreach ($op in $multiCharOperators) {
             if ($this.Position + $op.Length - 1 -lt $this.Source.Length) {
@@ -497,10 +498,8 @@ class PHPParser {
                 }
                 return $this.ParseExpressionStatement()
             }
-            default {
-                return $this.ParseExpressionStatement()
-            }
         }
+        return $this.ParseExpressionStatement()
     }
     
     [hashtable]ParseIfStatement() {
@@ -550,9 +549,10 @@ class PHPParser {
                 $value = $this.ParseExpression()
                 $this.Expect("OPERATOR", ":")
                 $statements = @()
-                while ($this.Peek().Type -ne "KEYWORD" -or ($this.Peek().Value -ne "case" -and $this.Peek().Value -ne "default")) {
+                while ($this.Peek().Type -ne "KEYWORD" -or ($this.Peek().Value -ne "case" -and $this.Peek().Value -ne "default" -and $this.Peek().Value -ne "}")) {
                     $stmt = $this.ParseStatement()
                     if ($stmt) { $statements += $stmt }
+                    if ($this.Peek().Type -eq "EOF") { break }
                 }
                 $cases += @{ type = "case"; value = $value; statements = $statements }
             } elseif ($this.Peek().Type -eq "KEYWORD" -and $this.Peek().Value -eq "default") {
@@ -562,8 +562,12 @@ class PHPParser {
                 while ($this.Peek().Type -ne "OPERATOR" -or $this.Peek().Value -ne "}") {
                     $stmt = $this.ParseStatement()
                     if ($stmt) { $statements += $stmt }
+                    if ($this.Peek().Type -eq "EOF") { break }
                 }
                 $cases += @{ type = "default"; statements = $statements }
+            } else {
+                $this.Consume()
+                if ($this.Peek().Type -eq "EOF") { break }
             }
         }
         
@@ -777,6 +781,7 @@ class PHPParser {
         $members = @()
         
         while ($this.Peek().Type -ne "OPERATOR" -or $this.Peek().Value -ne "}") {
+            if ($this.Peek().Type -eq "EOF") { break }
             $token = $this.Peek()
             switch ($token.Type) {
                 "KEYWORD" {
@@ -785,6 +790,7 @@ class PHPParser {
                         "protected" { $members += $this.ParsePropertyOrMethod() }
                         "private" { $members += $this.ParsePropertyOrMethod() }
                         "static" { $members += $this.ParsePropertyOrMethod() }
+                        "readonly" { $members += $this.ParsePropertyOrMethod() }
                         "const" { $members += $this.ParseConstDeclaration() }
                         "use" { $members += $this.ParseTraitUse() }
                         "function" { $members += $this.ParseMethodDeclaration() }
@@ -881,9 +887,9 @@ class PHPParser {
         $this.Expect("OPERATOR", ";")
         
         return @{
-            type = "property"
+            node_type = "property"
             name = $name.name
-            type = $type
+            prop_type = $type
             default = $default
             visibility = $visibility
             static = $static
@@ -998,6 +1004,7 @@ class PHPParser {
         $members = @()
         
         while ($this.Peek().Value -ne "}") {
+            if ($this.Peek().Type -eq "EOF") { break }
             if ($this.Peek().Type -eq "KEYWORD" -and $this.Peek().Value -eq "case") {
                 $this.Consume()
                 $caseName = $this.Expect("IDENTIFIER").Value
@@ -1033,6 +1040,7 @@ class PHPParser {
             $this.Consume()
             $statements = @()
             while ($this.Peek().Value -ne "}") {
+                if ($this.Peek().Type -eq "EOF") { break }
                 $stmt = $this.ParseStatement()
                 if ($stmt) { $statements += $stmt }
             }
@@ -1195,7 +1203,7 @@ class PHPParser {
     [hashtable]ParseAssignmentExpression() {
         $expr = $this.ParseConditionalExpression()
         
-        if ($this.Peek().Value -match "^(=|\\+=|-=|\\*=|/=|\\.=|%=|&=|\\|=|\\^=|<<=|>>=|\\*\\*=|\?\?=)$") {
+        if ($this.Peek().Value -match "^(=|\\+=|-=|\\*=|/=|\\.=|%=|&=|\\|=|\\^=|<<=|>>=|\\*\\*=|\\?\\?=)$") {
             $operator = $this.Consume().Value
             $right = $this.ParseAssignmentExpression()
             return @{ type = "assignment"; operator = $operator; left = $expr; right = $right }
@@ -1288,7 +1296,7 @@ class PHPParser {
     [hashtable]ParseEqualityExpression() {
         $expr = $this.ParseComparativeExpression()
         
-        while ($this.Peek().Value -match "^(==|!=|===|!==|<=>)$") {
+        while ($this.Peek().Value -match "^(==|!=|===|!==|<=|>=|<|>)$") {
             $operator = $this.Consume().Value
             $right = $this.ParseComparativeExpression()
             $expr = @{ type = "binary_op"; operator = $operator; left = $expr; right = $right }
@@ -1324,7 +1332,7 @@ class PHPParser {
     [hashtable]ParseAdditiveExpression() {
         $expr = $this.ParseMultiplicativeExpression()
         
-        while ($this.Peek().Value -match "^(\\+|-|\\.)$") {
+        while ($this.Peek().Value -match "^(\\+|\\-)\\.?$") {
             $operator = $this.Consume().Value
             $right = $this.ParseMultiplicativeExpression()
             $expr = @{ type = "binary_op"; operator = $operator; left = $expr; right = $right }
@@ -1358,7 +1366,7 @@ class PHPParser {
     }
     
     [hashtable]ParseUnaryExpression() {
-        if ($this.Peek().Value -match "^(\\+|-|!|~|@)$") {
+        if ($this.Peek().Value -match "^(\\+|\\-|!|~|@)$") {
             $operator = $this.Consume().Value
             $expr = $this.ParseUnaryExpression()
             return @{ type = "unary_op"; operator = $operator; operand = $expr }
@@ -1447,7 +1455,7 @@ class PHPParser {
                     $expr = $this.ParseExpression()
                     $this.Expect("OPERATOR", ")")
                     return $expr
-                } elseif ($token.Value -eq "$") {
+                } elseif ($token.Value -eq '$') {
                     return $this.ParseVariable()
                 } elseif ($token.Value -eq "[") {
                     return $this.ParseArrayCreation()
@@ -1460,7 +1468,7 @@ class PHPParser {
     }
     
     [hashtable]ParseVariable() {
-        if ($this.Peek().Value -eq "$") {
+        if ($this.Peek().Value -eq '$') {
             $this.Consume()
             if ($this.Peek().Type -eq "IDENTIFIER") {
                 $name = $this.Consume().Value
@@ -1549,7 +1557,15 @@ class FileCache {
     [string]$CacheDir
     [int]$DefaultTTL
     
-    FileCache([string]$cacheDir, [int]$defaultTTL = 3600) {
+    FileCache([string]$cacheDir) {
+        $this.CacheDir = $cacheDir
+        $this.DefaultTTL = 3600
+        if (!(Test-Path $cacheDir)) {
+            New-Item -ItemType Directory -Path $cacheDir -Force | Out-Null
+        }
+    }
+    
+    FileCache([string]$cacheDir, [int]$defaultTTL) {
         $this.CacheDir = $cacheDir
         $this.DefaultTTL = $defaultTTL
         if (!(Test-Path $cacheDir)) {
@@ -1676,7 +1692,7 @@ class DnsResolver {
                 return $records
             }
         } catch {
-            Write-Log "DNS lookup failed for $domain: $($_.Exception.Message)" "WARNING"
+            Write-Log "DNS lookup failed for ${domain}: $($_.Exception.Message)" "WARNING"
         }
         
         return @()
@@ -1887,8 +1903,8 @@ class McpServer {
             "resources/read" { return $this.HandleResourcesRead($message) }
             "prompts/list" { return $this.HandlePromptsList($message) }
             "prompts/get" { return $this.HandlePromptsGet($message) }
-            default { return $this.ErrorResponse("Unknown MCP message type: $($message.type)") }
         }
+        return $this.ErrorResponse("Unknown MCP message type: $($message.type)")
     }
     
     [object]HandleInitialize($message) {
@@ -1906,17 +1922,17 @@ class McpServer {
     }
     
     [object]HandleToolsList($message) {
-        $tools = @()
+        $toolList = @()
         foreach ($name in $this.Tools.Keys) {
             $tool = $this.Tools[$name]
-            $tools += @{
+            $toolList += @{
                 name = $name
                 description = $tool.description
                 parameters = $tool.params
                 version = $tool.version
             }
         }
-        return @{ type = "tools/list_response"; tools = $tools }
+        return @{ type = "tools/list_response"; tools = $toolList }
     }
     
     [object]HandleToolsCall($message) {
@@ -1937,16 +1953,16 @@ class McpServer {
     }
     
     [object]HandleResourcesList($message) {
-        $resources = @()
+        $resourceList = @()
         foreach ($uri in $this.Resources.Keys) {
             $resource = $this.Resources[$uri]
-            $resources += @{
+            $resourceList += @{
                 uri = $uri
                 name = $resource.name
                 mimeType = $resource.mimeType
             }
         }
-        return @{ type = "resources/list_response"; resources = $resources }
+        return @{ type = "resources/list_response"; resources = $resourceList }
     }
     
     [object]HandleResourcesRead($message) {
@@ -1974,16 +1990,16 @@ class McpServer {
     }
     
     [object]HandlePromptsList($message) {
-        $prompts = @()
+        $promptList = @()
         foreach ($name in $this.Prompts.Keys) {
             $prompt = $this.Prompts[$name]
-            $prompts += @{
+            $promptList += @{
                 name = $name
                 description = $prompt.description
                 parameters = $prompt.params
             }
         }
-        return @{ type = "prompts/list_response"; prompts = $prompts }
+        return @{ type = "prompts/list_response"; prompts = $promptList }
     }
     
     [object]HandlePromptsGet($message) {
@@ -2031,14 +2047,14 @@ class McpServer {
             param($params)
             $cache = [FileCache]::new($CacheDir)
             return $cache.Stats()
-        }, @{})
+        }, @{ })
         
         $this.RegisterTool("clear_cache", "Clear the cache", {
             param($params)
             $cache = [FileCache]::new($CacheDir)
             $cache.Clear()
             return @{ cleared = $true }
-        }, @{})
+        }, @{ })
     }
 }
 
@@ -2206,7 +2222,8 @@ class HttpServer {
                             return $this.ExecuteStatement($elseif.statement)
                         }
                     }
-                } elseif ($stmt.else) {
+                }
+                if ($stmt.else) {
                     return $this.ExecuteStatement($stmt.else)
                 }
                 return ""
@@ -2233,10 +2250,8 @@ class HttpServer {
                 }
                 return $output
             }
-            default {
-                return ""
-            }
         }
+        return ""
     }
     
     [object]ExecuteExpression($expr) {
@@ -2269,8 +2284,8 @@ class HttpServer {
                     "||" { return $left -or $right }
                     "and" { return $left -and $right }
                     "or" { return $left -or $right }
-                    default { return $null }
                 }
+                return $null
             }
             "unary_op" {
                 $operand = $this.ExecuteExpression($expr.operand)
@@ -2278,13 +2293,11 @@ class HttpServer {
                     "!" { return -not $operand }
                     "-" { return -$operand }
                     "+" { return +$operand }
-                    default { return $operand }
                 }
-            }
-            default {
-                return $null
+                return $operand
             }
         }
+        return $null
     }
     
     [void]RegisterDefaultRoutes() {
@@ -2404,7 +2417,7 @@ $mcp.RegisterPrompt("system_status", "System status prompt", {
         memory = [System.GC]::GetTotalMemory($false)
     }
     return "System Status: $($status | ConvertTo-Json)"
-}, @{})
+}, @{ })
 
 # Register JSON-RPC methods
 $jsonRpc = $server.JsonRpc
@@ -2496,12 +2509,13 @@ while ($listener.IsListening -and -not $token.IsCancellationRequested) {
     try {
         $context = $listener.GetContextAsync().GetAwaiter().GetResult()
         
-        # Process request in background
-        $task = [System.Threading.Tasks.Task]::Run({
-            param($ctx)
+        # Process request in background using Start-ThreadJob-compatible script closure
+        $ctx = $context
+        Start-Job -ScriptBlock {
+            param($ctx2, $server2)
             try {
-                $request = $ctx.Request
-                $response = $ctx.Response
+                $request = $ctx2.Request
+                $response = $ctx2.Response
                 
                 # Get request data
                 $method = $request.HttpMethod
@@ -2520,7 +2534,7 @@ while ($listener.IsListening -and -not $token.IsCancellationRequested) {
                 }
                 
                 # Dispatch request
-                $result = $server.Dispatch($method, $uri, $input)
+                $result = $server2.Dispatch($method, $uri, $input)
                 
                 # Send response
                 $response.StatusCode = 200
@@ -2536,17 +2550,16 @@ while ($listener.IsListening -and -not $token.IsCancellationRequested) {
                 $response.OutputStream.Write($bytes, 0, $bytes.Length)
                 $response.OutputStream.Close()
             } catch {
-                Write-Log "Error processing request: $($_.Exception.Message)" "ERROR"
                 try {
-                    $ctx.Response.StatusCode = 500
-                    $ctx.Response.ContentType = "application/json"
-                    $errorMsg = @{ error = "Internal Server Error" } | ConvertTo-Json
+                    $ctx2.Response.StatusCode = 500
+                    $ctx2.Response.ContentType = "application/json"
+                    $errorMsg = @{ error = "Internal Server Error"; detail = $_.Exception.Message } | ConvertTo-Json
                     $bytes = [System.Text.Encoding]::UTF8.GetBytes($errorMsg)
-                    $ctx.Response.OutputStream.Write($bytes, 0, $bytes.Length)
-                    $ctx.Response.OutputStream.Close()
+                    $ctx2.Response.OutputStream.Write($bytes, 0, $bytes.Length)
+                    $ctx2.Response.OutputStream.Close()
                 } catch {}
             }
-        }, $context)
+        } -ArgumentList $ctx, $server | Out-Null
         
     } catch {
         if (-not $token.IsCancellationRequested) {
