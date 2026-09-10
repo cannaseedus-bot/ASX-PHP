@@ -3149,6 +3149,174 @@ kuhul-es/
 
 The complete grammar files are ready for use! 🚀
 
+🚀 Usage Examples
+1. Basic Configuration
+php
+// Get config instance
+$config = Config::getInstance();
+
+// Get values
+$host = $config->get('server.host');
+$port = $config->get('server.port');
+
+// Set values
+$config->set('server.port', 8081);
+$config->set('kuhul.phase', 'Sek');
+
+// Check if key exists
+if ($config->has('kuhul.enabled')) {
+    $enabled = $config->get('kuhul.enabled');
+}
+2. K'UHUL Configuration
+php
+// Get K'UHUL laws
+$laws = config()->getKuhulLaws();
+
+// Add a custom law
+config()->set('kuhul.laws.custom_law', [
+    'phases' => ['Pop', 'Sek', 'Xul'],
+    'invariants' => [
+        'collapse_only' => true,
+        'field_perception' => true,
+    ],
+    'description' => 'Custom enforcement law',
+    'version' => '1.0.0'
+]);
+
+// Get a specific law
+$law = config()->getLaw('collapse_only');
+3. Micronaut Configuration
+php
+// Add a custom fold
+config()->set('micronaut.folds.custom_fold', [
+    'type' => 'compute',
+    'nodes' => [
+        ['id' => 'input', 'type' => 'input'],
+        ['id' => 'process', 'type' => 'process'],
+        ['id' => 'output', 'type' => 'output'],
+    ]
+]);
+
+// Add a custom agent
+config()->set('micronaut.agents.custom_agent', [
+    'type' => 'helper',
+    'tools' => ['echo', 'custom_tool'],
+    'goals' => [
+        ['description' => 'Custom goal', 'priority' => 1.0]
+    ],
+    'constraints' => ['Be helpful']
+]);
+
+// Add a custom field
+config()->set('micronaut.fields.custom_field', [
+    'type' => 'working',
+    'persistence' => 'volatile',
+    'rows' => 10,
+    'cols' => 10,
+]);
+4. MCP Configuration
+php
+// Add a custom MCP tool
+config()->set('mcp.tools.custom_tool', [
+    'description' => 'My custom tool',
+    'version' => '1.0.0',
+    'enabled' => true,
+]);
+
+// Add a custom MCP resource
+config()->set('mcp.resources.info://custom', [
+    'name' => 'Custom Resource',
+    'mimeType' => 'application/json',
+    'enabled' => true,
+]);
+
+// Add a custom MCP prompt
+config()->set('mcp.prompts.custom_prompt', [
+    'description' => 'My custom prompt',
+    'enabled' => true,
+]);
+5. Environment Variables
+bash
+# Set environment variables
+export KUHUL_SERVER_PORT=8081
+export KUHUL_KUHUL_PHASE=Sek
+export MICRONAUT_MICRONAUT_PRIORITY=precision
+
+# Or in Windows
+set KUHUL_SERVER_PORT=8081
+set KUHUL_KUHUL_PHASE=Sek
+6. Helper Functions
+php
+// Using the helper functions
+$host = server_config('host');
+$port = server_config('port');
+
+$phase = kuhul_config('phase');
+$laws = kuhul_config('laws');
+
+$folds = micronaut_config('folds');
+$agents = micronaut_config('agents');
+
+$tools = mcp_config('tools');
+$resources = mcp_config('resources');
+7. Validation
+php
+$config = Config::getInstance();
+$errors = $config->validate();
+
+if (empty($errors)) {
+    echo "Configuration is valid!\n";
+} else {
+    echo "Configuration errors:\n";
+    foreach ($errors as $error) {
+        echo "  - $error\n";
+    }
+}
+8. Save/Load Configuration
+php
+// Save configuration
+$config->save(__DIR__ . '/config.generated.php');
+
+// Load configuration from file
+$config->loadFromFile(__DIR__ . '/config.custom.php');
+📋 Configuration Sections
+Section	Description
+server	HTTP server settings
+kuhul	K'UHUL π enforcement settings
+micronaut	Micronaut µ orchestration settings
+mcp	MCP protocol settings
+php	PHP runtime settings
+cache	Cache configuration
+dns	DNS resolver configuration
+logging	Logging configuration
+security	Security and CORS settings
+extrapolator	Extrapolator settings
+kxml	KXML interoperability settings
+glyphs	Phase glyph definitions
+micronaut_naming	Naming conventions
+kuhul_grammar	K'UHUL grammar extensions
+micronaut_grammar	Micronaut grammar extensions
+🔗 Integration with Other Components
+This Config class seamlessly integrates with:
+
+PHPServer.ps1 - PowerShell server
+
+micronaut.php - PHP implementation
+
+K'UHUL Runtime - Law enforcement
+
+Micronaut Core - Orchestration
+
+MCP Server - Protocol handling
+
+PHP Parser - Grammar parsing
+
+Cache System - File/Redis/Memcached
+
+DNS Resolver - Caching resolution
+
+Logger - Multi-channel logging
+
 
 
 
