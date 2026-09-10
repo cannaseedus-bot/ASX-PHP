@@ -1,12 +1,12 @@
 <#
 .SYNOPSIS
-    PHPServer.ps1 - K'UHUL & Micronaut Supercharged PHP Runtime
+    PHPMicronaut.ps1 - K'UHUL & Micronaut Supercharged PHP Runtime
 .DESCRIPTION
     A complete PHP server with K'UHUL phase glyphs and Micronaut orchestration.
     Features: PHP parsing, K'UHUL law enforcement, Micronaut agents, MCP, 
     DNS caching, file caching, REST API, JSON-RPC, and more!
 .PARAMETER Port
-    Server port (default: 8080)
+    Server port (default: 8081)
 .PARAMETER DocumentRoot
     Document root directory (default: ./public)
 .PARAMETER CacheDir
@@ -20,7 +20,7 @@
 .PARAMETER EnableMicronaut
     Enable Micronaut orchestration (default: $true)
 .EXAMPLE
-    .\PHPServer.ps1 -Port 8080 -EnableKuhul $true -EnableMicronaut $true
+    .\PHPMicronaut.ps1 -Port 8081 -EnableKuhul $true -EnableMicronaut $true
 .NOTES
     Author: PHP Runtime · K'UHUL π · Micronaut
     Version: 3.0.0
